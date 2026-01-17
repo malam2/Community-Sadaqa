@@ -1,0 +1,295 @@
+Below is an end-to-end, command-driven workflow to build your iOS-only MVP in VS Code (as your main editor) with GitHub Copilot doing most of the coding. You will still need Xcode for iOS build/signing/simulator, but you can keep day-to-day coding inside VS Code and build/run via terminal.
+
+I’m going to assume: SwiftUI + Firebase (Auth + Firestore + optional FCM later), “mosque community = IOK Diamond Bar” hardcoded for MVP, anonymous posting toggle, moderation/reporting.
+
+⸻
+
+0) Prereqs (one-time)
+
+Install Xcode + command line tools
+	•	Install Xcode from App Store
+	•	Then run:
+
+xcode-select --install
+
+Install VS Code + GitHub Copilot extensions
+
+In VS Code:
+	•	Install GitHub Copilot
+	•	Install GitHub Copilot Chat
+	•	Install Swift extension (and “Swift Language Support / SourceKit-LSP” if available)
+
+Install tooling via Homebrew
+
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+brew update
+brew install git swiftlint swiftformat
+brew install tuist
+
+Why Tuist? It makes iOS projects reproducible and easy to generate/build from terminal while you code in VS Code.
+
+⸻
+
+1) Create repo + project skeleton (commands)
+
+mkdir iok-sadaqa
+cd iok-sadaqa
+git init
+gh repo create iok-sadaqa --private --source=. --remote=origin --push
+
+Create a basic README:
+
+cat > README.md <<'EOF'
+# IOK Sadaqa (iOS)
+Mosque-centered community help app (nonprofit, sadaqa). MVP: iOS-only, English-only.
+EOF
+
+
+⸻
+
+2) Generate an iOS app project with Tuist
+
+Initialize Tuist
+
+tuist init --platform ios
+
+This creates a Tuist project. Now generate Xcode workspace:
+
+tuist generate
+
+Open the folder in VS Code:
+
+code .
+
+And open the generated workspace in Xcode (for simulator runs/signing):
+
+open *.xcworkspace
+
+
+⸻
+
+3) Add Firebase via Swift Package Manager (SPM)
+
+You will add Firebase packages inside Xcode (one-time), then code mainly in VS Code:
+
+In Xcode:
+	•	Project → Package Dependencies → Add
+	•	Add Firebase iOS SDK package:
+	•	https://github.com/firebase/firebase-ios-sdk
+	•	Select:
+	•	FirebaseAuth
+	•	FirebaseFirestore
+	•	(Optional later: FirebaseMessaging for push)
+
+Then in Firebase Console:
+	•	Create a Firebase project
+	•	Add iOS app (bundle id must match your app)
+	•	Download GoogleService-Info.plist
+	•	Drag it into your app target in Xcode
+
+⸻
+
+4) Turn VS Code + Copilot into your “app builder”
+
+VS Code settings (recommended)
+
+Create .vscode/settings.json:
+
+mkdir -p .vscode
+cat > .vscode/settings.json <<'EOF'
+{
+  "editor.formatOnSave": true,
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": false
+  }
+}
+EOF
+
+
+⸻
+
+5) Use this architecture (Copilot will implement it)
+
+You’ll build with a clean separation:
+	•	App/ : entry point, environment objects
+	•	Features/Auth/ : Apple/Google sign-in + session state
+	•	Features/Feed/ : list posts + filters
+	•	Features/Post/ : create request/offer + anonymous toggle
+	•	Features/Chat/ : optional MVP v1.1
+	•	Core/Models/ : UserProfile, Post, Report
+	•	Core/Services/ : AuthService, FirestoreService, ModerationService
+	•	Core/UI/ : components (cards, chips, bottom sheets)
+
+⸻
+
+6) Copilot “Commands” (use Copilot Chat exactly like this)
+
+Open Copilot Chat and run these prompts in order. These are designed to be copy/paste “build commands” for Copilot.
+
+6.1 Create the base app shell + navigation
+
+Copilot Chat Prompt 1:
+
+Create a SwiftUI iOS app named “IOKSadaqa”. Use MVVM + services. Create a TabView with 3 tabs: Feed, Create, Profile. Add a floating “Create” button on Feed as well. Use modern interactive UI: animated transitions, matchedGeometryEffect for expanding a post card into a detail sheet, haptics on key actions. Create folder structure: App, Core, Features (Auth, Feed, Post, Profile). Provide code files accordingly.
+
+6.2 Define models
+
+Prompt 2:
+
+Create Core/Models for:
+	•	UserProfile: id, displayName, email, communityId, createdAt
+	•	Community: id, name, city, state (MVP hardcode IOK Diamond Bar)
+	•	Post: id, communityId, type(request/offer), category, title, description, isAnonymous, authorId, authorDisplayName (optional), createdAt, status(open/fulfilled), urgent(bool), contactPreference(inAppOnly/phone/other)
+	•	Report: id, postId, reporterId, reason, createdAt
+Include Codable, Firestore mapping helpers, and enum raw values.
+
+6.3 Firebase bootstrap
+
+Prompt 3:
+
+Implement Firebase initialization in App entry. Create FirestoreService with CRUD for posts: createPost, fetchPosts(communityId, filters), updatePostStatus, reportPost. Implement paging and real-time updates using Firestore listeners. Add caching and optimistic UI updates.
+
+6.4 Auth with Apple + Google (simple)
+
+Prompt 4:
+
+Implement AuthService using FirebaseAuth with Sign in with Apple and Google. Create a SessionStore ObservableObject with states: unauthenticated, authenticating, authenticated(user). On first login, create UserProfile in Firestore with communityId default = “iok_diamond_bar”. Keep email private. Add “Continue as Anonymous Poster” toggle for posts (not anonymous auth session).
+
+6.5 Feed UI (very interactive)
+
+Prompt 5:
+
+Build Feed UI:
+	•	Top filter chips: Request/Offer, Category, Urgent, Open/Fulfilled
+	•	Post cards with subtle animations, swipe actions (Fulfilled, Report), long-press to preview
+	•	Tap expands card into detail view (matched geometry) with “Offer Help / I Can Help” button
+	•	Add search bar and sorting (Newest, Urgent first)
+Keep it clean and modern.
+
+6.6 Create Post flow (request/offer + anonymous toggle)
+
+Prompt 6:
+
+Build Create Post flow: segmented control Request vs Offer, category picker, title + description, urgent toggle, anonymous toggle (explains “name hidden to community”), contact preference, preview screen, publish button with progress state + error handling. Enforce legal-safe categories by allowing only these categories: Food, Baby Supplies, Ride, Essentials, Consulting/Advice, Temporary Shelter, Other (with warning). Add disclaimer text and require user to accept “No illegal requests/services” checkbox before publishing.
+
+6.7 Moderation + reporting
+
+Prompt 7:
+
+Implement reporting: user can report a post with reason (Scam, Illegal, Harassment, Other). Store in Firestore collection “reports”. Add basic moderation rules: if post receives >=3 unique reports, auto-hide it (status = hidden) until admin review. Add an Admin view (only for a hardcoded list of admin UIDs in config) to review reports and restore/delete posts.
+
+6.8 Profile + settings
+
+Prompt 8:
+
+Build Profile tab: user info, community fixed to IOK Diamond Bar (MVP), notification preferences placeholder, guidelines page, privacy policy placeholder, logout. Add a “My Posts” list with edit status (mark fulfilled).
+
+⸻
+
+7) Add a “Copilot-driven” task runner in your repo
+
+Create a Makefile to standardize build/lint/format from terminal:
+
+cat > Makefile <<'EOF'
+APP_SCHEME=App
+
+.PHONY: generate build test lint format
+
+generate:
+	tuist generate
+
+build:
+	xcodebuild -workspace *.xcworkspace -scheme $(APP_SCHEME) -destination 'platform=iOS Simulator,name=iPhone 15' build
+
+test:
+	xcodebuild -workspace *.xcworkspace -scheme $(APP_SCHEME) -destination 'platform=iOS Simulator,name=iPhone 15' test
+
+lint:
+	swiftlint
+
+format:
+	swiftformat .
+EOF
+
+Now you can run:
+
+make generate
+make build
+
+
+⸻
+
+8) Firestore rules (minimum viable safety)
+
+In Firebase Console → Firestore → Rules, use something like:
+	•	Only authenticated users can read/write posts in their community
+	•	Only author can update their own post status
+	•	Reports allowed by any authenticated user
+	•	Admin-only delete/restore actions
+
+Copilot Chat Prompt 9 (rules):
+
+Write Firestore security rules for collections: users, posts, reports. Ensure:
+	•	Only authenticated users can read posts for their own communityId
+	•	Only author can update their post fields except status=hidden (admin/mod only)
+	•	Any user can create a report but cannot edit/delete reports
+	•	Admin users are hardcoded by UID list in rules for MVP
+
+(Then paste the generated rules into Firebase Console.)
+
+⸻
+
+9) Run the app (terminal + Xcode)
+
+Generate workspace:
+
+make generate
+
+Build:
+
+make build
+
+Run in Simulator:
+	•	easiest: click Run in Xcode
+	•	or via command line:
+
+xcrun simctl boot "iPhone 15" || true
+open -a Simulator
+
+
+⸻
+
+10) What “interactive UI” should mean for your MVP (features checklist)
+
+Make sure Copilot implements these (and you review):
+	•	Smooth feed scrolling with skeleton loading
+	•	Filter chips with animated selection
+	•	Card → detail expansion using matchedGeometryEffect
+	•	Bottom sheet for report reasons
+	•	Swipe actions on cards (fulfill/report)
+	•	Haptics on publish / fulfill / offer-help
+	•	Empty states (no posts yet) with guidance text
+	•	“Anonymous” badge on posts and a privacy explanation
+
+⸻
+
+11) If you want “end-to-end Copilot automation” even harder
+
+Use Copilot Chat like a “scaffold generator”:
+
+Prompt 10:
+
+Create a step-by-step commit plan. For each step, list files created/modified. Then generate code for step 1 only. After that, wait for “next” to generate step 2. Keep each step buildable.
+
+This prevents Copilot from dumping too much at once and keeps your repo consistently compiling.
+
+⸻
+
+If you want, I can also provide:
+	•	A ready-made data schema (Firestore collections + indexes)
+	•	A “no-scams” safety design (rate limits, identity friction, trusted volunteers)
+	•	A simple onboarding flow specifically for IOK Diamond Bar posters/announcements (QR code + “community code” approach)
+
+Tell me if you want messaging/chat in the MVP (v1.0) or as the next milestone (v1.1).
