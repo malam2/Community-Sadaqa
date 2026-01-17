@@ -78,7 +78,8 @@ export function SegmentedControl<T extends string>({
             style={[
               styles.label,
               {
-                color: value === option.value ? theme.primary : theme.textSecondary,
+                color:
+                  value === option.value ? theme.primary : theme.textSecondary,
                 fontWeight: value === option.value ? "600" : "400",
               },
             ]}

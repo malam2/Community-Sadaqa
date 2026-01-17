@@ -1,5 +1,11 @@
 import React from "react";
-import { View, StyleSheet, ScrollView, Alert, ActivityIndicator } from "react-native";
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
@@ -9,11 +15,12 @@ import * as Haptics from "expo-haptics";
 import { ThemedText } from "@/components/ThemedText";
 import { PostCard } from "@/components/PostCard";
 import { Button } from "@/components/Button";
+import { toast } from "@/components/Toast";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCreatePostMutation } from "@/hooks/queries";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { Post } from "@/types/post";
-import { createPost } from "@/lib/api";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 type PreviewPostRouteProp = RouteProp<RootStackParamList, "PreviewPost">;
@@ -22,12 +29,13 @@ export default function PreviewPostScreen() {
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
   const { theme } = useTheme();
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<PreviewPostRouteProp>();
   const { user } = useAuth();
 
   const { postData } = route.params;
-  const [isPublishing, setIsPublishing] = React.useState(false);
+  const createMutation = useCreatePostMutation();
 
   const previewPost: Post = {
     id: "preview",
@@ -38,11 +46,15 @@ export default function PreviewPostScreen() {
     description: postData.description,
     isAnonymous: postData.isAnonymous,
     authorId: "",
-    authorDisplayName: postData.isAnonymous ? undefined : user?.displayName || "You",
+    authorDisplayName: postData.isAnonymous
+      ? undefined
+      : user?.displayName || "You",
     createdAt: Date.now(),
     status: "open",
     urgent: postData.isUrgent,
     contactPreference: postData.contactPreference,
+    contactPhone: postData.contactPhone,
+    contactEmail: postData.contactEmail,
   };
 
   const handlePublish = async () => {
@@ -51,25 +63,27 @@ export default function PreviewPostScreen() {
       return;
     }
 
-    setIsPublishing(true);
     try {
-      await createPost(user.id, {
-        type: postData.type,
-        category: postData.category,
-        title: postData.title,
-        description: postData.description,
-        isAnonymous: postData.isAnonymous,
-        urgent: postData.isUrgent,
-        contactPreference: postData.contactPreference,
+      await createMutation.mutateAsync({
+        userId: user.id,
+        data: {
+          type: postData.type,
+          category: postData.category,
+          title: postData.title,
+          description: postData.description,
+          isAnonymous: postData.isAnonymous,
+          urgent: postData.isUrgent,
+          contactPreference: postData.contactPreference,
+          contactPhone: postData.contactPhone,
+          contactEmail: postData.contactEmail,
+        },
       });
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       navigation.navigate("Success", { type: postData.type });
     } catch (error: any) {
-      Alert.alert("Error", error.message || "Failed to publish post. Please try again.");
+      toast.error("Failed to publish", error.message || "Please try again.");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    } finally {
-      setIsPublishing(false);
     }
   };
 
@@ -127,10 +141,10 @@ export default function PreviewPostScreen() {
       >
         <Button
           onPress={handlePublish}
-          disabled={isPublishing}
+          disabled={createMutation.isPending}
           style={styles.publishButton}
         >
-          {isPublishing ? (
+          {createMutation.isPending ? (
             <ActivityIndicator color="#FFFFFF" size="small" />
           ) : (
             "Publish Post"

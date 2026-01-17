@@ -32,7 +32,8 @@ function CreateTabPlaceholder() {
 
 function CreateTabButton() {
   const { theme } = useTheme();
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({

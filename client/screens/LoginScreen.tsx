@@ -1,5 +1,12 @@
 import React from "react";
-import { View, StyleSheet, Pressable, Alert, ActivityIndicator, Image } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Pressable,
+  Alert,
+  ActivityIndicator,
+  Image,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -19,12 +26,14 @@ import { AuthStackParamList } from "@/navigation/AuthStackNavigator";
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
   const { theme } = useTheme();
-  const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
-  const { setUser } = useAuth();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
+  const { setUser, continueAsGuest } = useAuth();
 
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
+  const [isGuestLoading, setIsGuestLoading] = React.useState(false);
 
   const isFormValid = email.trim().length > 0 && password.length >= 6;
 
@@ -38,9 +47,24 @@ export default function LoginScreen() {
       setUser(user);
     } catch (error: any) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert("Login Failed", error.message || "Please check your credentials and try again.");
+      Alert.alert(
+        "Login Failed",
+        error.message || "Please check your credentials and try again.",
+      );
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleContinueAsGuest = async () => {
+    setIsGuestLoading(true);
+    try {
+      await continueAsGuest();
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } catch (error) {
+      console.error("Failed to continue as guest:", error);
+    } finally {
+      setIsGuestLoading(false);
     }
   };
 
@@ -70,13 +94,19 @@ export default function LoginScreen() {
           </Animated.View>
           <Animated.View entering={FadeInDown.delay(200).duration(400)}>
             <ThemedText type="h1" style={styles.title}>
-              Local Ummah
+              One Ummah
             </ThemedText>
             <ThemedText
               type="body"
               style={[styles.subtitle, { color: theme.textSecondary }]}
             >
-              Community helping community
+              In these days, we have all we need — each other.
+            </ThemedText>
+            <ThemedText
+              type="small"
+              style={[styles.missionText, { color: theme.textTertiary }]}
+            >
+              A community where asking for help is honored, and giving is a joy.
             </ThemedText>
           </Animated.View>
         </View>
@@ -117,6 +147,42 @@ export default function LoginScreen() {
               "Sign In"
             )}
           </Button>
+
+          <View style={styles.divider}>
+            <View
+              style={[
+                styles.dividerLine,
+                { backgroundColor: theme.textTertiary },
+              ]}
+            />
+            <ThemedText
+              style={[styles.dividerText, { color: theme.textTertiary }]}
+            >
+              or
+            </ThemedText>
+            <View
+              style={[
+                styles.dividerLine,
+                { backgroundColor: theme.textTertiary },
+              ]}
+            />
+          </View>
+
+          <Pressable
+            onPress={handleContinueAsGuest}
+            disabled={isGuestLoading}
+            style={[styles.guestButton, { borderColor: theme.primary }]}
+          >
+            {isGuestLoading ? (
+              <ActivityIndicator color={theme.primary} size="small" />
+            ) : (
+              <ThemedText
+                style={[styles.guestButtonText, { color: theme.primary }]}
+              >
+                Continue as Guest
+              </ThemedText>
+            )}
+          </Pressable>
         </Animated.View>
 
         <Animated.View
@@ -171,12 +237,43 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     textAlign: "center",
+    marginBottom: Spacing.sm,
+  },
+  missionText: {
+    textAlign: "center",
+    fontStyle: "italic",
+    lineHeight: 20,
   },
   form: {
     marginBottom: Spacing["2xl"],
   },
   button: {
     marginTop: Spacing.lg,
+  },
+  divider: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: Spacing.xl,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    opacity: 0.3,
+  },
+  dividerText: {
+    marginHorizontal: Spacing.md,
+    fontSize: 14,
+  },
+  guestButton: {
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1.5,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  guestButtonText: {
+    fontWeight: "600",
+    fontSize: 16,
   },
   footer: {
     flexDirection: "row",

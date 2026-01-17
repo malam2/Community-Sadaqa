@@ -1,5 +1,15 @@
 import React from "react";
-import { View, StyleSheet, Pressable, Alert, FlatList } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Pressable,
+  Alert,
+  FlatList,
+  Modal,
+  TextInput,
+  Platform,
+  ActivityIndicator,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
@@ -12,11 +22,14 @@ import * as Haptics from "expo-haptics";
 import { ThemedText } from "@/components/ThemedText";
 import { PostCard } from "@/components/PostCard";
 import { EmptyState } from "@/components/EmptyState";
+import { Button } from "@/components/Button";
+import { SkeletonFeed, SkeletonProfileHeader } from "@/components/Skeleton";
+import { toast } from "@/components/Toast";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserPostsQuery } from "@/hooks/queries";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { Post } from "@/types/post";
-import { fetchUserPosts } from "@/lib/api";
 import { updateDisplayName } from "@/lib/auth";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
@@ -25,80 +38,54 @@ export default function ProfileScreen() {
   const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
   const { theme } = useTheme();
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { user, setUser, logout } = useAuth();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { user, setUser, logout, isGuest } = useAuth();
 
-  const [myPosts, setMyPosts] = React.useState<Post[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
+  // React Query for posts
+  const { data: myPosts = [], isLoading } = useUserPostsQuery(
+    !isGuest ? user?.id : undefined,
+  );
 
-  const loadData = React.useCallback(async () => {
-    if (!user) return;
-    
-    try {
-      const posts = await fetchUserPosts(user.id);
-      setMyPosts(posts);
-    } catch (error) {
-      console.error("Failed to load posts:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user]);
-
-  React.useEffect(() => {
-    loadData();
-  }, [loadData]);
-
-  React.useEffect(() => {
-    const unsubscribe = navigation.addListener("focus", () => {
-      loadData();
-    });
-    return unsubscribe;
-  }, [navigation, loadData]);
+  const [showNameModal, setShowNameModal] = React.useState(false);
+  const [newDisplayName, setNewDisplayName] = React.useState("");
+  const [isSavingName, setIsSavingName] = React.useState(false);
 
   const handleEditName = () => {
-    if (!user) return;
-    
-    Alert.prompt(
-      "Edit Display Name",
-      "Enter your name as it will appear to the community",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Save",
-          onPress: async (newName) => {
-            if (newName && newName.trim()) {
-              try {
-                const updated = await updateDisplayName(user.id, newName.trim());
-                setUser(updated);
-                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-              } catch (error: any) {
-                Alert.alert("Error", error.message || "Failed to update name.");
-              }
-            }
-          },
-        },
-      ],
-      "plain-text",
-      user.displayName
-    );
+    if (!user || isGuest) return;
+    setNewDisplayName(user.displayName);
+    setShowNameModal(true);
+  };
+
+  const handleSaveName = async () => {
+    if (!user || !newDisplayName.trim()) return;
+
+    setIsSavingName(true);
+    try {
+      const updated = await updateDisplayName(user.id, newDisplayName.trim());
+      setUser(updated);
+      setShowNameModal(false);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      toast.success("Name updated", "Your display name has been changed.");
+    } catch (error: any) {
+      toast.error("Error", error.message || "Failed to update name.");
+    } finally {
+      setIsSavingName(false);
+    }
   };
 
   const handleLogout = () => {
-    Alert.alert(
-      "Sign Out",
-      "Are you sure you want to sign out?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Sign Out",
-          style: "destructive",
-          onPress: async () => {
-            await logout();
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          },
+    Alert.alert("Sign Out", "Are you sure you want to sign out?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Sign Out",
+        style: "destructive",
+        onPress: async () => {
+          await logout();
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handlePostPress = (post: Post) => {
@@ -107,20 +94,45 @@ export default function ProfileScreen() {
 
   const renderHeader = () => (
     <View style={styles.header}>
-      <View
-        style={[styles.avatar, { backgroundColor: theme.primary + "20" }]}
-      >
+      <View style={[styles.avatar, { backgroundColor: theme.primary + "20" }]}>
         <Feather name="user" size={32} color={theme.primary} />
       </View>
 
-      <Pressable onPress={handleEditName} style={styles.nameContainer}>
-        <ThemedText type="h2">{user?.displayName || "Community Member"}</ThemedText>
-        <Feather name="edit-2" size={16} color={theme.textTertiary} style={styles.editIcon} />
-      </Pressable>
+      {isGuest ? (
+        <>
+          <ThemedText type="h2">Guest</ThemedText>
+          <ThemedText
+            type="small"
+            style={[styles.emailText, { color: theme.textSecondary }]}
+          >
+            Sign up to save your posts and preferences
+          </ThemedText>
+          <Button onPress={() => logout()} style={styles.signUpButton}>
+            Create Account
+          </Button>
+        </>
+      ) : (
+        <>
+          <Pressable onPress={handleEditName} style={styles.nameContainer}>
+            <ThemedText type="h2">
+              {user?.displayName || "Community Member"}
+            </ThemedText>
+            <Feather
+              name="edit-2"
+              size={16}
+              color={theme.textTertiary}
+              style={styles.editIcon}
+            />
+          </Pressable>
 
-      <ThemedText type="small" style={[styles.emailText, { color: theme.textSecondary }]}>
-        {user?.email}
-      </ThemedText>
+          <ThemedText
+            type="small"
+            style={[styles.emailText, { color: theme.textSecondary }]}
+          >
+            {user?.email}
+          </ThemedText>
+        </>
+      )}
 
       <View
         style={[
@@ -149,18 +161,20 @@ export default function ProfileScreen() {
         />
         <MenuItem
           icon="log-out"
-          label="Sign Out"
+          label={isGuest ? "Exit Guest Mode" : "Sign Out"}
           onPress={handleLogout}
           theme={theme}
           danger
         />
       </View>
 
-      <View style={styles.postsSection}>
-        <ThemedText type="h3" style={styles.sectionTitle}>
-          My Posts
-        </ThemedText>
-      </View>
+      {!isGuest && (
+        <View style={styles.postsSection}>
+          <ThemedText type="h3" style={styles.sectionTitle}>
+            My Posts
+          </ThemedText>
+        </View>
+      )}
     </View>
   );
 
@@ -174,18 +188,33 @@ export default function ProfileScreen() {
     </Animated.View>
   );
 
-  const renderEmpty = () => (
-    <EmptyState
-      title="No posts yet"
-      description="Create a request or offer to help your community"
-      actionLabel="Create Post"
-      onAction={() => navigation.navigate("CreatePost")}
-    />
-  );
+  const renderEmpty = () =>
+    isGuest ? null : (
+      <EmptyState
+        title="No posts yet"
+        description="Create a request or offer to help your community"
+        actionLabel="Create Post"
+        onAction={() => navigation.navigate("CreatePost")}
+      />
+    );
 
-  if (isLoading) {
+  if (isLoading && !isGuest) {
     return (
-      <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]} />
+      <View
+        style={[styles.container, { backgroundColor: theme.backgroundRoot }]}
+      >
+        <View
+          style={{
+            paddingTop: headerHeight + Spacing.xl,
+            paddingHorizontal: Spacing.lg,
+          }}
+        >
+          <SkeletonProfileHeader />
+          <View style={{ marginTop: Spacing.xl }}>
+            <SkeletonFeed count={2} />
+          </View>
+        </View>
+      </View>
     );
   }
 
@@ -206,6 +235,74 @@ export default function ProfileScreen() {
         scrollIndicatorInsets={{ bottom: insets.bottom }}
         showsVerticalScrollIndicator={false}
       />
+
+      {/* Edit Name Modal */}
+      <Modal
+        visible={showNameModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowNameModal(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setShowNameModal(false)}
+        >
+          <Pressable
+            style={[
+              styles.modalContent,
+              { backgroundColor: theme.backgroundSecondary },
+            ]}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <ThemedText type="h3" style={styles.modalTitle}>
+              Edit Display Name
+            </ThemedText>
+            <ThemedText
+              type="small"
+              style={[styles.modalSubtitle, { color: theme.textSecondary }]}
+            >
+              Enter your name as it will appear to the community
+            </ThemedText>
+            <TextInput
+              style={[
+                styles.modalInput,
+                {
+                  backgroundColor: theme.backgroundRoot,
+                  color: theme.text,
+                  borderColor: theme.textTertiary,
+                },
+              ]}
+              value={newDisplayName}
+              onChangeText={setNewDisplayName}
+              placeholder="Your display name"
+              placeholderTextColor={theme.textTertiary}
+              autoFocus
+              maxLength={50}
+            />
+            <View style={styles.modalButtons}>
+              <Pressable
+                style={[styles.modalButton, styles.modalCancelButton]}
+                onPress={() => setShowNameModal(false)}
+              >
+                <ThemedText style={{ color: theme.textSecondary }}>
+                  Cancel
+                </ThemedText>
+              </Pressable>
+              <Button
+                onPress={handleSaveName}
+                disabled={!newDisplayName.trim() || isSavingName}
+                style={styles.modalSaveButton}
+              >
+                {isSavingName ? (
+                  <ActivityIndicator color="#FFF" size="small" />
+                ) : (
+                  "Save"
+                )}
+              </Button>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -227,7 +324,11 @@ function MenuItem({ icon, label, onPress, theme, danger }: MenuItemProps) {
       <View
         style={[
           styles.menuIcon,
-          { backgroundColor: danger ? theme.urgent + "15" : theme.backgroundTertiary },
+          {
+            backgroundColor: danger
+              ? theme.urgent + "15"
+              : theme.backgroundTertiary,
+          },
         ]}
       >
         <Feather
@@ -317,5 +418,53 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     marginBottom: Spacing.lg,
+  },
+  signUpButton: {
+    marginTop: Spacing.md,
+    marginBottom: Spacing.lg,
+    paddingHorizontal: Spacing["2xl"],
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: Spacing.xl,
+  },
+  modalContent: {
+    width: "100%",
+    maxWidth: 400,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.xl,
+  },
+  modalTitle: {
+    marginBottom: Spacing.xs,
+  },
+  modalSubtitle: {
+    marginBottom: Spacing.lg,
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.md,
+    fontSize: 16,
+    marginBottom: Spacing.lg,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    gap: Spacing.md,
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: Spacing.md,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: BorderRadius.md,
+  },
+  modalCancelButton: {
+    backgroundColor: "transparent",
+  },
+  modalSaveButton: {
+    flex: 1,
   },
 });

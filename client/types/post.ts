@@ -27,6 +27,8 @@ export interface Post {
   status: PostStatus;
   urgent: boolean;
   contactPreference: ContactPreference;
+  contactPhone?: string;
+  contactEmail?: string;
 }
 
 export interface Report {
@@ -56,7 +58,10 @@ export const CATEGORIES: { value: PostCategory; label: string }[] = [
   { value: "other", label: "Other" },
 ];
 
-export const CONTACT_PREFERENCES: { value: ContactPreference; label: string }[] = [
+export const CONTACT_PREFERENCES: {
+  value: ContactPreference;
+  label: string;
+}[] = [
   { value: "in_app", label: "In-App Only" },
   { value: "phone", label: "Phone" },
   { value: "email", label: "Email" },

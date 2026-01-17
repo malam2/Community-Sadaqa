@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import type { Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
@@ -186,7 +187,8 @@ function configureExpoAndLanding(app: express.Application) {
       return serveExpoManifest(platform, res);
     }
 
-    if (req.path === "/") {
+    // In production, serve the web app; in development, serve landing page
+    if (req.path === "/" && process.env.NODE_ENV !== "production") {
       return serveLandingPage({
         req,
         res,
@@ -199,7 +201,24 @@ function configureExpoAndLanding(app: express.Application) {
   });
 
   app.use("/assets", express.static(path.resolve(process.cwd(), "assets")));
-  app.use(express.static(path.resolve(process.cwd(), "static-build")));
+
+  // Serve the built Expo web app in production
+  const distPath = path.resolve(process.cwd(), "dist");
+  if (fs.existsSync(distPath)) {
+    log("Serving built web app from /dist");
+    app.use(express.static(distPath));
+
+    // Serve index.html for all non-API routes (SPA routing)
+    // Express 5 uses {*path} instead of * for wildcard
+    app.get("/{*path}", (req: Request, res: Response, next: NextFunction) => {
+      if (req.path.startsWith("/api")) {
+        return next();
+      }
+      res.sendFile(path.join(distPath, "index.html"));
+    });
+  } else {
+    app.use(express.static(path.resolve(process.cwd(), "static-build")));
+  }
 
   log("Expo routing: Checking expo-platform header on / and /manifest");
 }
@@ -236,15 +255,8 @@ function setupErrorHandler(app: express.Application) {
 
   setupErrorHandler(app);
 
-  const port = parseInt(process.env.PORT || "5000", 10);
-  server.listen(
-    {
-      port,
-      host: "0.0.0.0",
-      reusePort: true,
-    },
-    () => {
-      log(`express server serving on port ${port}`);
-    },
-  );
+  const port = parseInt(process.env.PORT || "3001", 10);
+  server.listen(port, () => {
+    log(`Express server running at http://localhost:${port}`);
+  });
 })();

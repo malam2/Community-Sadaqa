@@ -20,7 +20,7 @@ export default function FeedStackNavigator() {
         name="Feed"
         component={FeedScreen}
         options={{
-          headerTitle: () => <HeaderTitle title="IOK Diamond Bar" />,
+          headerTitle: () => <HeaderTitle title="One Ummah" subtitle="Together, We Rise 💚" />,
         }}
       />
     </Stack.Navigator>

@@ -14,7 +14,10 @@ import { Dropdown } from "@/components/Dropdown";
 import { Toggle } from "@/components/Toggle";
 import { Button } from "@/components/Button";
 import { ThemedText } from "@/components/ThemedText";
+import { EmptyState } from "@/components/EmptyState";
+import { IslamicQuote } from "@/components/IslamicQuote";
 import { useTheme } from "@/hooks/useTheme";
+import { useAuth } from "@/contexts/AuthContext";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import {
   PostType,
@@ -34,7 +37,9 @@ export default function CreatePostScreen() {
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
   const { theme } = useTheme();
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { isGuest, logout } = useAuth();
 
   const [type, setType] = React.useState<PostType>("request");
   const [category, setCategory] = React.useState<PostCategory | null>(null);
@@ -44,14 +49,23 @@ export default function CreatePostScreen() {
   const [isAnonymous, setIsAnonymous] = React.useState(false);
   const [contactPreference, setContactPreference] =
     React.useState<ContactPreference | null>(null);
+  const [contactPhone, setContactPhone] = React.useState("");
+  const [contactEmail, setContactEmail] = React.useState("");
   const [disclaimerAccepted, setDisclaimerAccepted] = React.useState(false);
+
+  const needsPhone =
+    contactPreference === "phone" || contactPreference === "any";
+  const needsEmail =
+    contactPreference === "email" || contactPreference === "any";
 
   const isFormValid =
     category !== null &&
     title.trim().length > 0 &&
     description.trim().length > 0 &&
     contactPreference !== null &&
-    disclaimerAccepted;
+    disclaimerAccepted &&
+    (!needsPhone || contactPhone.trim().length >= 10) &&
+    (!needsEmail || contactEmail.trim().includes("@"));
 
   const handleNext = () => {
     if (!isFormValid) {
@@ -69,9 +83,36 @@ export default function CreatePostScreen() {
         isUrgent,
         isAnonymous,
         contactPreference: contactPreference!,
+        contactPhone: contactPhone.trim() || undefined,
+        contactEmail: contactEmail.trim() || undefined,
       },
     });
   };
+
+  // Show signup prompt for guests
+  if (isGuest) {
+    return (
+      <View
+        style={[styles.container, { backgroundColor: theme.backgroundRoot }]}
+      >
+        <View
+          style={[
+            styles.guestContainer,
+            { paddingTop: headerHeight + Spacing.xl },
+          ]}
+        >
+          <EmptyState
+            title="Create an Account"
+            description="Sign up to create posts and help your community. It only takes a minute!"
+            actionLabel="Sign Up"
+            onAction={() => {
+              logout(); // Clear guest session to show auth screen
+            }}
+          />
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
@@ -91,6 +132,9 @@ export default function CreatePostScreen() {
           testID="post-type-selector"
         />
 
+        {/* Encouraging Message */}
+        <IslamicQuote variant="banner" />
+
         <View style={styles.section}>
           <Dropdown
             label="Category"
@@ -103,10 +147,7 @@ export default function CreatePostScreen() {
 
           {category === "other" ? (
             <View
-              style={[
-                styles.warning,
-                { backgroundColor: theme.accent + "20" },
-              ]}
+              style={[styles.warning, { backgroundColor: theme.accent + "20" }]}
             >
               <Feather name="alert-circle" size={16} color="#B8860B" />
               <ThemedText style={[styles.warningText, { color: "#B8860B" }]}>
@@ -142,6 +183,29 @@ export default function CreatePostScreen() {
             placeholder="How should people reach you?"
             testID="contact-dropdown"
           />
+
+          {needsPhone && (
+            <FormInput
+              label="Phone Number"
+              value={contactPhone}
+              onChangeText={setContactPhone}
+              placeholder="Enter your phone number"
+              keyboardType="phone-pad"
+              testID="input-phone"
+            />
+          )}
+
+          {needsEmail && (
+            <FormInput
+              label="Email Address"
+              value={contactEmail}
+              onChangeText={setContactEmail}
+              placeholder="Enter your email address"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              testID="input-email"
+            />
+          )}
         </View>
 
         <View style={styles.section}>
@@ -250,5 +314,10 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: Spacing.lg,
+  },
+  guestContainer: {
+    flex: 1,
+    justifyContent: "center",
+    paddingHorizontal: Spacing.lg,
   },
 });

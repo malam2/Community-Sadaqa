@@ -21,7 +21,12 @@ interface FilterChipProps {
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-export function FilterChip({ label, selected, onPress, testID }: FilterChipProps) {
+export function FilterChip({
+  label,
+  selected,
+  onPress,
+  testID,
+}: FilterChipProps) {
   const { theme, isDark } = useTheme();
   const scale = useSharedValue(1);
   const selectedProgress = useSharedValue(selected ? 1 : 0);
@@ -37,7 +42,10 @@ export function FilterChip({ label, selected, onPress, testID }: FilterChipProps
     const backgroundColor = interpolateColor(
       selectedProgress.value,
       [0, 1],
-      [isDark ? theme.backgroundSecondary : theme.backgroundSecondary, theme.primary]
+      [
+        isDark ? theme.backgroundSecondary : theme.backgroundSecondary,
+        theme.primary,
+      ],
     );
     return {
       transform: [{ scale: scale.value }],
@@ -68,10 +76,7 @@ export function FilterChip({ label, selected, onPress, testID }: FilterChipProps
     >
       <ThemedText
         type="small"
-        style={[
-          styles.label,
-          { color: selected ? "#FFFFFF" : theme.text },
-        ]}
+        style={[styles.label, { color: selected ? "#FFFFFF" : theme.text }]}
       >
         {label}
       </ThemedText>

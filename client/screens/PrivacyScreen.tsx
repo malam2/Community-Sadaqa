@@ -71,7 +71,7 @@ export default function PrivacyScreen() {
 
       <Section title="Contact Us" theme={theme}>
         If you have any questions about this privacy policy or our practices,
-        please contact the IOK Diamond Bar administration.
+        please contact the Local Ummah administration.
       </Section>
 
       <ThemedText

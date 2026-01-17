@@ -1,5 +1,12 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, boolean, integer, timestamp } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  varchar,
+  boolean,
+  integer,
+  timestamp,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -24,10 +31,14 @@ export const posts = pgTable("posts", {
   title: text("title").notNull(),
   description: text("description").notNull(),
   isAnonymous: boolean("is_anonymous").notNull().default(false),
-  authorId: varchar("author_id").notNull().references(() => users.id),
+  authorId: varchar("author_id")
+    .notNull()
+    .references(() => users.id),
   status: text("status").notNull().default("open"), // 'open' | 'fulfilled' | 'hidden'
   urgent: boolean("urgent").notNull().default(false),
   contactPreference: text("contact_preference").notNull().default("in_app"),
+  contactPhone: text("contact_phone"),
+  contactEmail: text("contact_email"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -35,8 +46,12 @@ export const reports = pgTable("reports", {
   id: varchar("id")
     .primaryKey()
     .default(sql`gen_random_uuid()`),
-  postId: varchar("post_id").notNull().references(() => posts.id),
-  reporterId: varchar("reporter_id").notNull().references(() => users.id),
+  postId: varchar("post_id")
+    .notNull()
+    .references(() => posts.id),
+  reporterId: varchar("reporter_id")
+    .notNull()
+    .references(() => users.id),
   reason: text("reason").notNull(), // 'scam' | 'illegal' | 'harassment' | 'other'
   details: text("details"),
   createdAt: timestamp("created_at").defaultNow().notNull(),

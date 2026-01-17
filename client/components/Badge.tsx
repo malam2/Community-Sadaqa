@@ -20,32 +20,32 @@ export function Badge({ variant, small = false }: BadgeProps) {
       case "request":
         return {
           label: "Request",
-          backgroundColor: theme.primary + "20",
+          backgroundColor: theme.primaryLight,
           textColor: theme.primary,
         };
       case "offer":
         return {
           label: "Offer",
-          backgroundColor: theme.accent + "30",
-          textColor: "#B8860B",
+          backgroundColor: theme.accentLight,
+          textColor: theme.accent,
         };
       case "urgent":
         return {
           label: "Urgent",
-          backgroundColor: theme.urgent + "20",
+          backgroundColor: theme.urgentLight,
           textColor: theme.urgent,
         };
       case "anonymous":
         return {
           label: "Anonymous",
-          backgroundColor: theme.anonymous + "20",
+          backgroundColor: theme.anonymousLight,
           textColor: theme.anonymous,
           showIcon: true,
         };
       case "fulfilled":
         return {
           label: "Fulfilled",
-          backgroundColor: theme.success + "20",
+          backgroundColor: theme.primaryLight,
           textColor: theme.success,
         };
       default:

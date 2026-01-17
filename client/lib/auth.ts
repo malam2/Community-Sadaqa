@@ -8,6 +8,17 @@ export interface AuthUser {
   email: string;
   displayName: string;
   communityId: string;
+  isGuest?: boolean;
+}
+
+export function createGuestUser(): AuthUser {
+  return {
+    id: `guest_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+    email: "",
+    displayName: "Guest",
+    communityId: "local_ummah",
+    isGuest: true,
+  };
 }
 
 export async function getStoredUser(): Promise<AuthUser | null> {
@@ -30,15 +41,22 @@ export async function clearUser(): Promise<void> {
   await AsyncStorage.removeItem(AUTH_KEY);
 }
 
-export async function signup(email: string, password: string, displayName: string): Promise<AuthUser> {
-  const response = await fetch(new URL("/api/auth/signup", getApiUrl()).toString(), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password, displayName }),
-  });
+export async function signup(
+  email: string,
+  password: string,
+  displayName: string,
+): Promise<AuthUser> {
+  const response = await fetch(
+    new URL("/api/auth/signup", getApiUrl()).toString(),
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password, displayName }),
+    },
+  );
 
   const data = await response.json();
-  
+
   if (!response.ok) {
     throw new Error(data.error || "Failed to create account");
   }
@@ -47,15 +65,21 @@ export async function signup(email: string, password: string, displayName: strin
   return data.user;
 }
 
-export async function login(email: string, password: string): Promise<AuthUser> {
-  const response = await fetch(new URL("/api/auth/login", getApiUrl()).toString(), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
-  });
+export async function login(
+  email: string,
+  password: string,
+): Promise<AuthUser> {
+  const response = await fetch(
+    new URL("/api/auth/login", getApiUrl()).toString(),
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    },
+  );
 
   const data = await response.json();
-  
+
   if (!response.ok) {
     throw new Error(data.error || "Failed to login");
   }
@@ -68,15 +92,21 @@ export async function logout(): Promise<void> {
   await clearUser();
 }
 
-export async function updateDisplayName(userId: string, displayName: string): Promise<AuthUser> {
-  const response = await fetch(new URL(`/api/users/${userId}`, getApiUrl()).toString(), {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ displayName }),
-  });
+export async function updateDisplayName(
+  userId: string,
+  displayName: string,
+): Promise<AuthUser> {
+  const response = await fetch(
+    new URL(`/api/users/${userId}`, getApiUrl()).toString(),
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ displayName }),
+    },
+  );
 
   const data = await response.json();
-  
+
   if (!response.ok) {
     throw new Error(data.error || "Failed to update name");
   }

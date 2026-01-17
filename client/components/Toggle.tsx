@@ -41,7 +41,7 @@ export function Toggle({
     const backgroundColor = interpolateColor(
       progress.value,
       [0, 1],
-      [theme.backgroundTertiary, theme.primary]
+      [theme.backgroundTertiary, theme.primary],
     );
     return { backgroundColor };
   });

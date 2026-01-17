@@ -1,5 +1,11 @@
 import React from "react";
-import { View, StyleSheet, Pressable, Alert, ActivityIndicator } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Pressable,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
@@ -11,17 +17,22 @@ import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollV
 import { ThemedText } from "@/components/ThemedText";
 import { FormInput } from "@/components/FormInput";
 import { Button } from "@/components/Button";
+import { toast } from "@/components/Toast";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSubmitReportMutation } from "@/hooks/queries";
 import { Spacing, BorderRadius } from "@/constants/theme";
-import { submitReport } from "@/lib/api";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 type ReportRouteProp = RouteProp<RootStackParamList, "Report">;
 
 type ReportReason = "scam" | "illegal" | "harassment" | "other";
 
-const REPORT_REASONS: { value: ReportReason; label: string; icon: keyof typeof Feather.glyphMap }[] = [
+const REPORT_REASONS: {
+  value: ReportReason;
+  label: string;
+  icon: keyof typeof Feather.glyphMap;
+}[] = [
   { value: "scam", label: "Scam or Fraud", icon: "alert-triangle" },
   { value: "illegal", label: "Illegal Content", icon: "shield-off" },
   { value: "harassment", label: "Harassment", icon: "user-x" },
@@ -32,14 +43,17 @@ export default function ReportScreen() {
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
   const { theme } = useTheme();
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<ReportRouteProp>();
   const { user } = useAuth();
 
   const { postId } = route.params;
-  const [selectedReason, setSelectedReason] = React.useState<ReportReason | null>(null);
+  const [selectedReason, setSelectedReason] =
+    React.useState<ReportReason | null>(null);
   const [details, setDetails] = React.useState("");
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+  const reportMutation = useSubmitReportMutation();
 
   const handleSubmit = async () => {
     if (!selectedReason) {
@@ -52,21 +66,23 @@ export default function ReportScreen() {
       return;
     }
 
-    setIsSubmitting(true);
     try {
-      await submitReport(user.id, postId, selectedReason, details.trim() || undefined);
+      await reportMutation.mutateAsync({
+        userId: user.id,
+        postId,
+        reason: selectedReason,
+        details: details.trim() || undefined,
+      });
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert(
-        "Report Submitted",
-        "Thank you for helping keep our community safe. We will review this report.",
-        [{ text: "OK", onPress: () => navigation.goBack() }]
+      toast.success(
+        "Report submitted",
+        "Thank you for helping keep our community safe.",
       );
+      navigation.goBack();
     } catch (error: any) {
-      Alert.alert("Error", error.message || "Failed to submit report. Please try again.");
+      toast.error("Failed to submit", error.message || "Please try again.");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -169,10 +185,10 @@ export default function ReportScreen() {
 
         <Button
           onPress={handleSubmit}
-          disabled={!selectedReason || isSubmitting}
+          disabled={!selectedReason || reportMutation.isPending}
           style={styles.submitButton}
         >
-          {isSubmitting ? (
+          {reportMutation.isPending ? (
             <ActivityIndicator color="#FFFFFF" size="small" />
           ) : (
             "Submit Report"

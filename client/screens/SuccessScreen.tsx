@@ -1,13 +1,19 @@
 import React from "react";
 import { View, StyleSheet, Image } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useNavigation, useRoute, RouteProp, CommonActions } from "@react-navigation/native";
+import {
+  useNavigation,
+  useRoute,
+  RouteProp,
+  CommonActions,
+} from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import Animated, { FadeIn, FadeInUp, ZoomIn } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 
 import { ThemedText } from "@/components/ThemedText";
 import { Button } from "@/components/Button";
+import { IslamicQuote } from "@/components/IslamicQuote";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing } from "@/constants/theme";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
@@ -17,7 +23,8 @@ type SuccessRouteProp = RouteProp<RootStackParamList, "Success">;
 export default function SuccessScreen() {
   const insets = useSafeAreaInsets();
   const { theme } = useTheme();
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<SuccessRouteProp>();
 
   const { type } = route.params;
@@ -32,7 +39,7 @@ export default function SuccessScreen() {
       CommonActions.reset({
         index: 0,
         routes: [{ name: "Main" }],
-      })
+      }),
     );
   };
 
@@ -68,9 +75,14 @@ export default function SuccessScreen() {
             style={[styles.description, { color: theme.textSecondary }]}
           >
             {isRequest
-              ? "Your request is now visible to the IOK Diamond Bar community. May Allah make it easy for you and send help your way."
-              : "JazakAllah khair for your generosity! Your offer is now visible to community members who may need your help."}
+              ? "Your request is now live! The ummah is here for you. May Allah send help your way through those eager to give."
+              : "JazakAllah khair! Your offer is now visible to those in need. You're making One Ummah stronger."}
           </ThemedText>
+        </Animated.View>
+
+        {/* Inspirational Quote */}
+        <Animated.View entering={FadeIn.delay(500).duration(400)} style={styles.quoteContainer}>
+          <IslamicQuote variant="inline" />
         </Animated.View>
       </View>
 
@@ -118,5 +130,10 @@ const styles = StyleSheet.create({
   },
   button: {
     width: "100%",
+  },
+  quoteContainer: {
+    marginTop: Spacing["2xl"],
+    width: "100%",
+    paddingHorizontal: Spacing.lg,
   },
 });

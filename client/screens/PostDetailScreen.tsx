@@ -1,5 +1,12 @@
 import React from "react";
-import { View, StyleSheet, ScrollView, Alert, Pressable } from "react-native";
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  Alert,
+  Pressable,
+  Linking,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
@@ -10,8 +17,10 @@ import * as Haptics from "expo-haptics";
 import { ThemedText } from "@/components/ThemedText";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
+import { toast } from "@/components/Toast";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUpdatePostMutation, useDeletePostMutation } from "@/hooks/queries";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import {
   Post,
@@ -19,7 +28,6 @@ import {
   getTimeAgo,
   getContactPreferenceLabel,
 } from "@/types/post";
-import { updatePost } from "@/lib/api";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 type PostDetailRouteProp = RouteProp<RootStackParamList, "PostDetail">;
@@ -28,26 +36,139 @@ export default function PostDetailScreen() {
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
   const { theme } = useTheme();
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<PostDetailRouteProp>();
   const { user } = useAuth();
 
   const { post } = route.params;
   const [currentPost, setCurrentPost] = React.useState<Post>(post);
   const isOwner = user?.id === post.authorId;
+  const isGuest = user?.isGuest ?? false;
+
+  // React Query mutations
+  const updateMutation = useUpdatePostMutation();
+  const deleteMutation = useDeletePostMutation();
+
+  const handleContact = async (method: "phone" | "email" | "sms") => {
+    const { contactPhone, contactEmail, title } = currentPost;
+
+    try {
+      let url = "";
+      if (method === "phone" && contactPhone) {
+        url = `tel:${contactPhone}`;
+      } else if (method === "sms" && contactPhone) {
+        const message = encodeURIComponent(
+          `Hi! I'm reaching out about your post "${title}" on Local Ummah.`,
+        );
+        url = `sms:${contactPhone}?body=${message}`;
+      } else if (method === "email" && contactEmail) {
+        const subject = encodeURIComponent(`Re: ${title} - Local Ummah`);
+        const body = encodeURIComponent(
+          `Hi!\n\nI'm reaching out about your post "${title}" on Local Ummah.\n\n`,
+        );
+        url = `mailto:${contactEmail}?subject=${subject}&body=${body}`;
+      }
+
+      if (url) {
+        const canOpen = await Linking.canOpenURL(url);
+        if (canOpen) {
+          await Linking.openURL(url);
+        } else {
+          Alert.alert(
+            "Error",
+            "Unable to open this contact method on your device.",
+          );
+        }
+      }
+    } catch (error) {
+      Alert.alert("Error", "Failed to open contact method.");
+    }
+  };
 
   const handleOfferHelp = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    if (isGuest) {
+      Alert.alert(
+        "Sign Up Required",
+        "Please create an account to contact the poster.",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Sign Up",
+            onPress: () => navigation.navigate("Auth" as any),
+          },
+        ],
+      );
+      return;
+    }
+
+    const { contactPreference, contactPhone, contactEmail } = currentPost;
+    const hasPhone = !!contactPhone;
+    const hasEmail = !!contactEmail;
+
+    // Build contact options based on what's available
+    const options: {
+      text: string;
+      onPress?: () => void;
+      style?: "cancel" | "default" | "destructive";
+    }[] = [];
+
+    if (contactPreference === "in_app") {
+      Alert.alert(
+        "Contact Preference",
+        "This poster prefers to be contacted through the app. In-app messaging is coming soon!",
+        [{ text: "OK" }],
+      );
+      return;
+    }
+
+    if (
+      hasPhone &&
+      (contactPreference === "phone" || contactPreference === "any")
+    ) {
+      options.push({
+        text: `📱 Text: ${contactPhone}`,
+        onPress: () => handleContact("sms"),
+      });
+      options.push({
+        text: `📞 Call: ${contactPhone}`,
+        onPress: () => handleContact("phone"),
+      });
+    }
+
+    if (
+      hasEmail &&
+      (contactPreference === "email" || contactPreference === "any")
+    ) {
+      options.push({
+        text: `✉️ Email: ${contactEmail}`,
+        onPress: () => handleContact("email"),
+      });
+    }
+
+    options.push({ text: "Cancel", style: "cancel" });
+
+    if (options.length === 1) {
+      Alert.alert(
+        "No Contact Info",
+        "The poster hasn't provided contact information yet.",
+        [{ text: "OK" }],
+      );
+      return;
+    }
+
     Alert.alert(
       currentPost.type === "request" ? "Offer Help" : "Accept Offer",
-      `Contact preference: ${getContactPreferenceLabel(currentPost.contactPreference)}\n\nIn a future update, this will connect you directly with the poster.`,
-      [{ text: "OK" }]
+      "How would you like to reach out?",
+      options,
     );
   };
 
   const handleMarkFulfilled = async () => {
     if (!user) return;
-    
+
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     Alert.alert(
       "Mark as Fulfilled",
@@ -58,17 +179,57 @@ export default function PostDetailScreen() {
           text: "Yes, Mark Fulfilled",
           onPress: async () => {
             try {
-              const updated = await updatePost(currentPost.id, user.id, {
-                status: "fulfilled",
+              const updated = await updateMutation.mutateAsync({
+                id: currentPost.id,
+                userId: user.id,
+                updates: { status: "fulfilled" },
               });
               setCurrentPost(updated);
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Success,
+              );
+              toast.success(
+                "Post fulfilled",
+                "Thank you for helping your community!",
+              );
             } catch (error: any) {
-              Alert.alert("Error", error.message || "Failed to update post.");
+              toast.error("Error", error.message || "Failed to update post.");
             }
           },
         },
-      ]
+      ],
+    );
+  };
+
+  const handleDeletePost = async () => {
+    if (!user) return;
+
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Alert.alert(
+      "Delete Post",
+      "Are you sure you want to delete this post? This action cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteMutation.mutateAsync({
+                id: currentPost.id,
+                userId: user.id,
+              });
+              Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Success,
+              );
+              toast.success("Post deleted");
+              navigation.goBack();
+            } catch (error: any) {
+              toast.error("Error", error.message || "Failed to delete post.");
+            }
+          },
+        },
+      ],
     );
   };
 
@@ -137,10 +298,7 @@ export default function PostDetailScreen() {
         ) : (
           <View style={styles.authorSection}>
             <View
-              style={[
-                styles.avatar,
-                { backgroundColor: theme.primary + "20" },
-              ]}
+              style={[styles.avatar, { backgroundColor: theme.primary + "20" }]}
             >
               <Feather name="user" size={20} color={theme.primary} />
             </View>
@@ -148,10 +306,7 @@ export default function PostDetailScreen() {
               <ThemedText type="body" style={{ fontWeight: "600" }}>
                 {currentPost.authorDisplayName || "Community Member"}
               </ThemedText>
-              <ThemedText
-                type="small"
-                style={{ color: theme.textSecondary }}
-              >
+              <ThemedText type="small" style={{ color: theme.textSecondary }}>
                 Local Ummah
               </ThemedText>
             </View>
@@ -183,19 +338,14 @@ export default function PostDetailScreen() {
             ]}
           >
             <Feather name="message-circle" size={16} color={theme.primary} />
-            <ThemedText
-              style={[styles.contactText, { color: theme.primary }]}
-            >
+            <ThemedText style={[styles.contactText, { color: theme.primary }]}>
               {getContactPreferenceLabel(currentPost.contactPreference)}
             </ThemedText>
           </View>
         </View>
 
         {!isOwner && currentPost.status === "open" ? (
-          <Pressable
-            style={[styles.reportButton]}
-            onPress={handleReport}
-          >
+          <Pressable style={[styles.reportButton]} onPress={handleReport}>
             <Feather name="flag" size={16} color={theme.textTertiary} />
             <ThemedText
               style={[styles.reportText, { color: theme.textTertiary }]}
@@ -217,14 +367,45 @@ export default function PostDetailScreen() {
           ]}
         >
           {isOwner ? (
-            <Button onPress={handleMarkFulfilled} style={styles.actionButton}>
-              Mark as Fulfilled
-            </Button>
+            <View style={styles.ownerActions}>
+              <Button
+                onPress={handleMarkFulfilled}
+                style={styles.primaryActionButton}
+              >
+                Mark as Fulfilled
+              </Button>
+              <Pressable
+                onPress={handleDeletePost}
+                style={[styles.deleteButton, { borderColor: theme.urgent }]}
+              >
+                <Feather name="trash-2" size={18} color={theme.urgent} />
+              </Pressable>
+            </View>
           ) : (
             <Button onPress={handleOfferHelp} style={styles.actionButton}>
               {currentPost.type === "request" ? "Offer Help" : "I Need This"}
             </Button>
           )}
+        </View>
+      ) : isOwner ? (
+        <View
+          style={[
+            styles.footer,
+            {
+              backgroundColor: theme.backgroundRoot,
+              paddingBottom: insets.bottom + Spacing.lg,
+            },
+          ]}
+        >
+          <Pressable
+            onPress={handleDeletePost}
+            style={[styles.deleteTextButton]}
+          >
+            <Feather name="trash-2" size={16} color={theme.urgent} />
+            <ThemedText style={[styles.deleteText, { color: theme.urgent }]}>
+              Delete Post
+            </ThemedText>
+          </Pressable>
         </View>
       ) : null}
     </View>
@@ -334,5 +515,31 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     width: "100%",
+  },
+  ownerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.md,
+  },
+  primaryActionButton: {
+    flex: 1,
+  },
+  deleteButton: {
+    width: 48,
+    height: 48,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1.5,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  deleteTextButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: Spacing.md,
+  },
+  deleteText: {
+    marginLeft: Spacing.sm,
+    fontWeight: "500",
   },
 });

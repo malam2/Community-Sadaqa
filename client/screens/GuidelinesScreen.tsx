@@ -70,8 +70,8 @@ export default function GuidelinesScreen() {
         type="small"
         style={[styles.footer, { color: theme.textTertiary }]}
       >
-        By using IOK Sadaqa, you agree to follow these guidelines. Violations may
-        result in removal of posts or account suspension.
+        By using IOK Sadaqa, you agree to follow these guidelines. Violations
+        may result in removal of posts or account suspension.
       </ThemedText>
     </ScrollView>
   );

@@ -1,0 +1,22 @@
+# Development compose - just the database, run server locally with hot reload
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: sadaqa-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sadaqa
+      POSTGRES_PASSWORD: sadaqa_local_dev
+      POSTGRES_DB: sadaqa
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sadaqa -d sadaqa"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:

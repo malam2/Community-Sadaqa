@@ -11,6 +11,7 @@ import PostDetailScreen from "@/screens/PostDetailScreen";
 import ReportScreen from "@/screens/ReportScreen";
 import GuidelinesScreen from "@/screens/GuidelinesScreen";
 import PrivacyScreen from "@/screens/PrivacyScreen";
+import AboutScreen from "@/screens/AboutScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/hooks/useTheme";
@@ -29,6 +30,8 @@ export type RootStackParamList = {
       isUrgent: boolean;
       isAnonymous: boolean;
       contactPreference: ContactPreference;
+      contactPhone?: string;
+      contactEmail?: string;
     };
   };
   Success: {
@@ -42,6 +45,7 @@ export type RootStackParamList = {
   };
   Guidelines: undefined;
   Privacy: undefined;
+  About: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -53,7 +57,14 @@ export default function RootStackNavigator() {
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: theme.backgroundRoot }}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: theme.backgroundRoot,
+        }}
+      >
         <ActivityIndicator size="large" color={theme.primary} />
       </View>
     );
@@ -119,6 +130,14 @@ export default function RootStackNavigator() {
             component={PrivacyScreen}
             options={{
               headerTitle: "Privacy",
+            }}
+          />
+          <Stack.Screen
+            name="About"
+            component={AboutScreen}
+            options={{
+              headerTitle: "About One Ummah",
+              presentation: "modal",
             }}
           />
         </>

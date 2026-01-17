@@ -74,10 +74,7 @@ export function Dropdown<T extends string>({
         animationType="fade"
         onRequestClose={() => setIsOpen(false)}
       >
-        <Pressable
-          style={styles.overlay}
-          onPress={() => setIsOpen(false)}
-        >
+        <Pressable style={styles.overlay} onPress={() => setIsOpen(false)}>
           <Animated.View
             entering={FadeIn.duration(200)}
             exiting={FadeOut.duration(200)}

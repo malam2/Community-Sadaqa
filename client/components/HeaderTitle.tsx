@@ -7,9 +7,10 @@ import { Spacing } from "@/constants/theme";
 
 interface HeaderTitleProps {
   title: string;
+  subtitle?: string;
 }
 
-export function HeaderTitle({ title }: HeaderTitleProps) {
+export function HeaderTitle({ title, subtitle }: HeaderTitleProps) {
   const { theme } = useTheme();
 
   return (
@@ -19,9 +20,16 @@ export function HeaderTitle({ title }: HeaderTitleProps) {
         style={styles.icon}
         resizeMode="contain"
       />
-      <ThemedText style={[styles.title, { color: theme.primary }]}>
-        {title}
-      </ThemedText>
+      <View style={styles.textContainer}>
+        <ThemedText style={[styles.title, { color: theme.primary }]}>
+          {title}
+        </ThemedText>
+        {subtitle && (
+          <ThemedText style={[styles.subtitle, { color: theme.textTertiary }]}>
+            {subtitle}
+          </ThemedText>
+        )}
+      </View>
     </View>
   );
 }
@@ -38,8 +46,16 @@ const styles = StyleSheet.create({
     marginRight: Spacing.sm,
     borderRadius: 6,
   },
+  textContainer: {
+    flexDirection: "column",
+  },
   title: {
     fontSize: 17,
     fontWeight: "700",
+  },
+  subtitle: {
+    fontSize: 11,
+    fontWeight: "500",
+    marginTop: -2,
   },
 });

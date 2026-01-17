@@ -21,7 +21,9 @@ export async function getPosts(): Promise<Post[]> {
   }
 }
 
-export async function savePost(post: Omit<Post, "id" | "createdAt">): Promise<Post> {
+export async function savePost(
+  post: Omit<Post, "id" | "createdAt">,
+): Promise<Post> {
   const posts = await getPosts();
   const newPost: Post = {
     ...post,
@@ -33,7 +35,10 @@ export async function savePost(post: Omit<Post, "id" | "createdAt">): Promise<Po
   return newPost;
 }
 
-export async function updatePost(id: string, updates: Partial<Post>): Promise<Post | null> {
+export async function updatePost(
+  id: string,
+  updates: Partial<Post>,
+): Promise<Post | null> {
   const posts = await getPosts();
   const index = posts.findIndex((p) => p.id === id);
   if (index === -1) return null;
@@ -88,7 +93,9 @@ export async function getReports(): Promise<Report[]> {
   }
 }
 
-export async function saveReport(report: Omit<Report, "id" | "createdAt">): Promise<Report> {
+export async function saveReport(
+  report: Omit<Report, "id" | "createdAt">,
+): Promise<Report> {
   const reports = await getReports();
   const newReport: Report = {
     ...report,
@@ -97,12 +104,12 @@ export async function saveReport(report: Omit<Report, "id" | "createdAt">): Prom
   };
   reports.push(newReport);
   await AsyncStorage.setItem(REPORTS_KEY, JSON.stringify(reports));
-  
+
   const reportCounts = reports.filter((r) => r.postId === report.postId).length;
   if (reportCounts >= 3) {
     await updatePost(report.postId, { status: "hidden" });
   }
-  
+
   return newReport;
 }
 
@@ -123,7 +130,8 @@ export async function seedSamplePosts(): Promise<void> {
       type: "request",
       category: "food",
       title: "Need groceries for family of 4",
-      description: "Assalamu alaikum, our family is going through a difficult time and we need help with groceries for this week. We have 2 young children. Any help would be greatly appreciated. JazakAllah khair.",
+      description:
+        "Assalamu alaikum, our family is going through a difficult time and we need help with groceries for this week. We have 2 young children. Any help would be greatly appreciated. JazakAllah khair.",
       isAnonymous: false,
       authorId: "sample1",
       authorDisplayName: "Brother Ahmed",
@@ -136,7 +144,8 @@ export async function seedSamplePosts(): Promise<void> {
       type: "offer",
       category: "ride",
       title: "Offering rides to Friday prayer",
-      description: "I can offer rides to Jummah prayer from the Diamond Bar area. I have space for 3 passengers. Please reach out if you need a ride!",
+      description:
+        "I can offer rides to Jummah prayer from the Diamond Bar area. I have space for 3 passengers. Please reach out if you need a ride!",
       isAnonymous: false,
       authorId: "sample2",
       authorDisplayName: "Brother Yusuf",
@@ -149,7 +158,8 @@ export async function seedSamplePosts(): Promise<void> {
       type: "request",
       category: "baby_supplies",
       title: "Baby clothes needed (0-6 months)",
-      description: "We are expecting our first child soon and could use any baby clothes, diapers, or supplies you might have. We would be very grateful for any help.",
+      description:
+        "We are expecting our first child soon and could use any baby clothes, diapers, or supplies you might have. We would be very grateful for any help.",
       isAnonymous: true,
       authorId: "sample3",
       status: "open",
@@ -161,7 +171,8 @@ export async function seedSamplePosts(): Promise<void> {
       type: "offer",
       category: "consulting",
       title: "Free tax preparation help",
-      description: "I am a certified tax preparer and would like to offer free tax preparation services to community members who need assistance. Available on weekends.",
+      description:
+        "I am a certified tax preparer and would like to offer free tax preparation services to community members who need assistance. Available on weekends.",
       isAnonymous: false,
       authorId: "sample4",
       authorDisplayName: "Sister Fatima",
@@ -177,7 +188,7 @@ export async function seedSamplePosts(): Promise<void> {
     const newPost: Post = {
       ...post,
       id: `sample_${i}`,
-      createdAt: Date.now() - (i * 3600000),
+      createdAt: Date.now() - i * 3600000,
     };
     posts.push(newPost);
     await AsyncStorage.setItem(POSTS_KEY, JSON.stringify(posts));

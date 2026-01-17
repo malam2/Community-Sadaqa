@@ -1,5 +1,11 @@
 import React from "react";
-import { View, StyleSheet, Pressable, Alert, ActivityIndicator } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Pressable,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -19,7 +25,8 @@ import { AuthStackParamList } from "@/navigation/AuthStackNavigator";
 export default function SignupScreen() {
   const insets = useSafeAreaInsets();
   const { theme } = useTheme();
-  const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
   const { setUser } = useAuth();
 
   const [displayName, setDisplayName] = React.useState("");
@@ -73,13 +80,19 @@ export default function SignupScreen() {
       >
         <Animated.View entering={FadeInDown.delay(100).duration(400)}>
           <ThemedText type="h1" style={styles.title}>
-            Join Local Ummah
+            Join One Ummah
           </ThemedText>
           <ThemedText
             type="body"
             style={[styles.subtitle, { color: theme.textSecondary }]}
           >
-            Create your account to start helping your community
+            Where neighbors become family 🤝
+          </ThemedText>
+          <ThemedText
+            type="small"
+            style={[styles.quoteText, { color: theme.textTertiary }]}
+          >
+            Many want to help but can't find a way. Many need help but find it hard to ask. We bridge that gap.
           </ThemedText>
         </Animated.View>
 
@@ -187,7 +200,11 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xs,
   },
   subtitle: {
-    marginBottom: Spacing["3xl"],
+    marginBottom: Spacing.sm,
+  },
+  quoteText: {
+    fontStyle: "italic",
+    marginBottom: Spacing["2xl"],
   },
   form: {
     marginBottom: Spacing["2xl"],
