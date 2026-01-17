@@ -1,16 +1,16 @@
 {
   "expo": {
-    "name": "IOK Sadaqa",
-    "slug": "iok-sadaqa",
+    "name": "Local Ummah",
+    "slug": "local-ummah",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "ioksadaqa",
+    "scheme": "localummah",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.iok.sadaqa"
+      "bundleIdentifier": "com.local.ummah"
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +19,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.iok.sadaqa"
+      "package": "com.local.ummah"
     },
     "web": {
       "output": "single",

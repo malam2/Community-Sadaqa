@@ -13,9 +13,11 @@ import { ThemedText } from "@/components/ThemedText";
 import { PostCard } from "@/components/PostCard";
 import { EmptyState } from "@/components/EmptyState";
 import { useTheme } from "@/hooks/useTheme";
+import { useAuth } from "@/contexts/AuthContext";
 import { Spacing, BorderRadius } from "@/constants/theme";
-import { Post, UserProfile } from "@/types/post";
-import { getUser, getPosts, clearAllData, saveUser } from "@/lib/storage";
+import { Post } from "@/types/post";
+import { fetchUserPosts } from "@/lib/api";
+import { updateDisplayName } from "@/lib/auth";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 export default function ProfileScreen() {
@@ -24,27 +26,23 @@ export default function ProfileScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const { theme } = useTheme();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { user, setUser, logout } = useAuth();
 
-  const [user, setUser] = React.useState<UserProfile | null>(null);
   const [myPosts, setMyPosts] = React.useState<Post[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
 
   const loadData = React.useCallback(async () => {
+    if (!user) return;
+    
     try {
-      const currentUser = await getUser();
-      setUser(currentUser);
-
-      if (currentUser) {
-        const allPosts = await getPosts();
-        const userPosts = allPosts.filter((p) => p.authorId === currentUser.id);
-        setMyPosts(userPosts);
-      }
+      const posts = await fetchUserPosts(user.id);
+      setMyPosts(posts);
     } catch (error) {
-      console.error("Failed to load profile:", error);
+      console.error("Failed to load posts:", error);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [user]);
 
   React.useEffect(() => {
     loadData();
@@ -58,6 +56,8 @@ export default function ProfileScreen() {
   }, [navigation, loadData]);
 
   const handleEditName = () => {
+    if (!user) return;
+    
     Alert.prompt(
       "Edit Display Name",
       "Enter your name as it will appear to the community",
@@ -66,35 +66,35 @@ export default function ProfileScreen() {
         {
           text: "Save",
           onPress: async (newName) => {
-            if (newName && newName.trim() && user) {
-              const updatedUser = { ...user, displayName: newName.trim() };
-              await saveUser(updatedUser);
-              setUser(updatedUser);
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            if (newName && newName.trim()) {
+              try {
+                const updated = await updateDisplayName(user.id, newName.trim());
+                setUser(updated);
+                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              } catch (error: any) {
+                Alert.alert("Error", error.message || "Failed to update name.");
+              }
             }
           },
         },
       ],
       "plain-text",
-      user?.displayName || ""
+      user.displayName
     );
   };
 
-  const handleClearData = () => {
+  const handleLogout = () => {
     Alert.alert(
-      "Clear All Data",
-      "This will delete all your posts and reset the app. This action cannot be undone.",
+      "Sign Out",
+      "Are you sure you want to sign out?",
       [
         { text: "Cancel", style: "cancel" },
         {
-          text: "Clear Data",
+          text: "Sign Out",
           style: "destructive",
           onPress: async () => {
-            await clearAllData();
+            await logout();
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            setUser(null);
-            setMyPosts([]);
-            Alert.alert("Data Cleared", "Please restart the app.");
           },
         },
       ]
@@ -118,6 +118,10 @@ export default function ProfileScreen() {
         <Feather name="edit-2" size={16} color={theme.textTertiary} style={styles.editIcon} />
       </Pressable>
 
+      <ThemedText type="small" style={[styles.emailText, { color: theme.textSecondary }]}>
+        {user?.email}
+      </ThemedText>
+
       <View
         style={[
           styles.communityBadge,
@@ -126,7 +130,7 @@ export default function ProfileScreen() {
       >
         <Feather name="map-pin" size={14} color={theme.primary} />
         <ThemedText style={[styles.communityText, { color: theme.primary }]}>
-          IOK Diamond Bar
+          Local Ummah
         </ThemedText>
       </View>
 
@@ -144,9 +148,9 @@ export default function ProfileScreen() {
           theme={theme}
         />
         <MenuItem
-          icon="trash-2"
-          label="Clear All Data"
-          onPress={handleClearData}
+          icon="log-out"
+          label="Sign Out"
+          onPress={handleLogout}
           theme={theme}
           danger
         />
@@ -264,10 +268,13 @@ const styles = StyleSheet.create({
   nameContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.xs,
   },
   editIcon: {
     marginLeft: Spacing.sm,
+  },
+  emailText: {
+    marginBottom: Spacing.md,
   },
   communityBadge: {
     flexDirection: "row",

@@ -10,9 +10,10 @@ import { ThemedText } from "@/components/ThemedText";
 import { PostCard } from "@/components/PostCard";
 import { Button } from "@/components/Button";
 import { useTheme } from "@/hooks/useTheme";
+import { useAuth } from "@/contexts/AuthContext";
 import { Spacing, BorderRadius } from "@/constants/theme";
-import { Post, PostCategory, ContactPreference, PostType } from "@/types/post";
-import { savePost, getUser } from "@/lib/storage";
+import { Post } from "@/types/post";
+import { createPost } from "@/lib/api";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 type PreviewPostRouteProp = RouteProp<RootStackParamList, "PreviewPost">;
@@ -23,20 +24,21 @@ export default function PreviewPostScreen() {
   const { theme } = useTheme();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<PreviewPostRouteProp>();
+  const { user } = useAuth();
 
   const { postData } = route.params;
   const [isPublishing, setIsPublishing] = React.useState(false);
 
   const previewPost: Post = {
     id: "preview",
-    communityId: "iok_diamond_bar",
+    communityId: "local_ummah",
     type: postData.type,
     category: postData.category,
     title: postData.title,
     description: postData.description,
     isAnonymous: postData.isAnonymous,
     authorId: "",
-    authorDisplayName: postData.isAnonymous ? undefined : "You",
+    authorDisplayName: postData.isAnonymous ? undefined : user?.displayName || "You",
     createdAt: Date.now(),
     status: "open",
     urgent: postData.isUrgent,
@@ -44,33 +46,27 @@ export default function PreviewPostScreen() {
   };
 
   const handlePublish = async () => {
+    if (!user) {
+      Alert.alert("Error", "Please log in to create a post.");
+      return;
+    }
+
     setIsPublishing(true);
     try {
-      const user = await getUser();
-      if (!user) {
-        Alert.alert("Error", "Please try again.");
-        setIsPublishing(false);
-        return;
-      }
-
-      await savePost({
-        communityId: "iok_diamond_bar",
+      await createPost(user.id, {
         type: postData.type,
         category: postData.category,
         title: postData.title,
         description: postData.description,
         isAnonymous: postData.isAnonymous,
-        authorId: user.id,
-        authorDisplayName: postData.isAnonymous ? undefined : user.displayName,
-        status: "open",
         urgent: postData.isUrgent,
         contactPreference: postData.contactPreference,
       });
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       navigation.navigate("Success", { type: postData.type });
-    } catch (error) {
-      Alert.alert("Error", "Failed to publish post. Please try again.");
+    } catch (error: any) {
+      Alert.alert("Error", error.message || "Failed to publish post. Please try again.");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setIsPublishing(false);

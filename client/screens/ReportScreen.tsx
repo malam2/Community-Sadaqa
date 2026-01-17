@@ -12,14 +12,14 @@ import { ThemedText } from "@/components/ThemedText";
 import { FormInput } from "@/components/FormInput";
 import { Button } from "@/components/Button";
 import { useTheme } from "@/hooks/useTheme";
+import { useAuth } from "@/contexts/AuthContext";
 import { Spacing, BorderRadius } from "@/constants/theme";
-import { Report } from "@/types/post";
-import { saveReport, getUser } from "@/lib/storage";
+import { submitReport } from "@/lib/api";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 type ReportRouteProp = RouteProp<RootStackParamList, "Report">;
 
-type ReportReason = Report["reason"];
+type ReportReason = "scam" | "illegal" | "harassment" | "other";
 
 const REPORT_REASONS: { value: ReportReason; label: string; icon: keyof typeof Feather.glyphMap }[] = [
   { value: "scam", label: "Scam or Fraud", icon: "alert-triangle" },
@@ -34,6 +34,7 @@ export default function ReportScreen() {
   const { theme } = useTheme();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<ReportRouteProp>();
+  const { user } = useAuth();
 
   const { postId } = route.params;
   const [selectedReason, setSelectedReason] = React.useState<ReportReason | null>(null);
@@ -46,20 +47,14 @@ export default function ReportScreen() {
       return;
     }
 
+    if (!user) {
+      Alert.alert("Error", "Please log in to submit a report.");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      const user = await getUser();
-      if (!user) {
-        Alert.alert("Error", "Please try again.");
-        return;
-      }
-
-      await saveReport({
-        postId,
-        reporterId: user.id,
-        reason: selectedReason,
-        details: details.trim() || undefined,
-      });
+      await submitReport(user.id, postId, selectedReason, details.trim() || undefined);
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Alert.alert(
@@ -67,8 +62,8 @@ export default function ReportScreen() {
         "Thank you for helping keep our community safe. We will review this report.",
         [{ text: "OK", onPress: () => navigation.goBack() }]
       );
-    } catch (error) {
-      Alert.alert("Error", "Failed to submit report. Please try again.");
+    } catch (error: any) {
+      Alert.alert("Error", error.message || "Failed to submit report. Please try again.");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setIsSubmitting(false);

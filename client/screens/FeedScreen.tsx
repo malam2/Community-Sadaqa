@@ -13,7 +13,7 @@ import { FilterChip } from "@/components/FilterChip";
 import { PostCard } from "@/components/PostCard";
 import { EmptyState } from "@/components/EmptyState";
 import { Post, PostType, PostCategory, CATEGORIES } from "@/types/post";
-import { getPosts, getUser, createDefaultUser, seedSamplePosts } from "@/lib/storage";
+import { fetchPosts } from "@/lib/api";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 type FilterType = "all" | PostType | "urgent";
@@ -40,14 +40,8 @@ export default function FeedScreen() {
 
   const loadPosts = React.useCallback(async () => {
     try {
-      let user = await getUser();
-      if (!user) {
-        user = await createDefaultUser();
-        await seedSamplePosts();
-      }
-      const allPosts = await getPosts();
-      const visiblePosts = allPosts.filter((p) => p.status !== "hidden");
-      setPosts(visiblePosts);
+      const allPosts = await fetchPosts();
+      setPosts(allPosts);
     } catch (error) {
       console.error("Failed to load posts:", error);
     } finally {
@@ -87,11 +81,7 @@ export default function FeedScreen() {
       result = result.filter((p) => p.category === activeCategoryFilter);
     }
 
-    return result.sort((a, b) => {
-      if (a.urgent && !b.urgent) return -1;
-      if (!a.urgent && b.urgent) return 1;
-      return b.createdAt - a.createdAt;
-    });
+    return result;
   }, [posts, activeFilter, activeCategoryFilter]);
 
   const handleFilterPress = (filter: FilterType) => {

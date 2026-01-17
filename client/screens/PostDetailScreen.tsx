@@ -11,6 +11,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { useTheme } from "@/hooks/useTheme";
+import { useAuth } from "@/contexts/AuthContext";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import {
   Post,
@@ -18,7 +19,7 @@ import {
   getTimeAgo,
   getContactPreferenceLabel,
 } from "@/types/post";
-import { updatePost, getUser } from "@/lib/storage";
+import { updatePost } from "@/lib/api";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 type PostDetailRouteProp = RouteProp<RootStackParamList, "PostDetail">;
@@ -29,20 +30,11 @@ export default function PostDetailScreen() {
   const { theme } = useTheme();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<PostDetailRouteProp>();
+  const { user } = useAuth();
 
   const { post } = route.params;
   const [currentPost, setCurrentPost] = React.useState<Post>(post);
-  const [isOwner, setIsOwner] = React.useState(false);
-
-  React.useEffect(() => {
-    const checkOwnership = async () => {
-      const user = await getUser();
-      if (user && user.id === post.authorId) {
-        setIsOwner(true);
-      }
-    };
-    checkOwnership();
-  }, [post.authorId]);
+  const isOwner = user?.id === post.authorId;
 
   const handleOfferHelp = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -54,6 +46,8 @@ export default function PostDetailScreen() {
   };
 
   const handleMarkFulfilled = async () => {
+    if (!user) return;
+    
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     Alert.alert(
       "Mark as Fulfilled",
@@ -63,12 +57,14 @@ export default function PostDetailScreen() {
         {
           text: "Yes, Mark Fulfilled",
           onPress: async () => {
-            const updated = await updatePost(currentPost.id, {
-              status: "fulfilled",
-            });
-            if (updated) {
+            try {
+              const updated = await updatePost(currentPost.id, user.id, {
+                status: "fulfilled",
+              });
               setCurrentPost(updated);
               Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            } catch (error: any) {
+              Alert.alert("Error", error.message || "Failed to update post.");
             }
           },
         },
@@ -156,7 +152,7 @@ export default function PostDetailScreen() {
                 type="small"
                 style={{ color: theme.textSecondary }}
               >
-                IOK Diamond Bar
+                Local Ummah
               </ThemedText>
             </View>
           </View>

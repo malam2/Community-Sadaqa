@@ -110,8 +110,7 @@ export default function CreatePostScreen() {
             >
               <Feather name="alert-circle" size={16} color="#B8860B" />
               <ThemedText style={[styles.warningText, { color: "#B8860B" }]}>
-                Please ensure your request follows community guidelines. Illegal
-                or inappropriate content will be removed.
+                Please ensure your request follows community guidelines.
               </ThemedText>
             </View>
           ) : null}
@@ -189,9 +188,8 @@ export default function CreatePostScreen() {
               type="small"
               style={[styles.disclaimerText, { color: theme.textSecondary }]}
             >
-              I confirm this post follows IOK Diamond Bar community guidelines
-              and does not contain any illegal, harmful, or inappropriate
-              content.
+              I confirm this post follows Local Ummah community guidelines and
+              does not contain any illegal, harmful, or inappropriate content.
             </ThemedText>
           </Pressable>
         </View>
