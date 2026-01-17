@@ -1,25 +1,26 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import HomeScreen from "@/screens/HomeScreen";
+
+import FeedScreen from "@/screens/FeedScreen";
 import { HeaderTitle } from "@/components/HeaderTitle";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 
-export type HomeStackParamList = {
-  Home: undefined;
+export type FeedStackParamList = {
+  Feed: undefined;
 };
 
-const Stack = createNativeStackNavigator<HomeStackParamList>();
+const Stack = createNativeStackNavigator<FeedStackParamList>();
 
-export default function HomeStackNavigator() {
+export default function FeedStackNavigator() {
   const screenOptions = useScreenOptions();
 
   return (
     <Stack.Navigator screenOptions={screenOptions}>
       <Stack.Screen
-        name="Home"
-        component={HomeScreen}
+        name="Feed"
+        component={FeedScreen}
         options={{
-          headerTitle: () => <HeaderTitle title="My App" />,
+          headerTitle: () => <HeaderTitle title="IOK Diamond Bar" />,
         }}
       />
     </Stack.Navigator>
