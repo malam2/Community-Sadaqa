@@ -3,10 +3,10 @@ import {
   View,
   StyleSheet,
   Pressable,
-  Alert,
   ActivityIndicator,
   Image,
 } from "react-native";
+import { showAlert } from "@/lib/alert";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -50,7 +50,7 @@ export default function LoginScreen() {
       setUser(user);
     } catch (error) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert(
+      showAlert(
         "Login Failed",
         getErrorMessage(error) ||
           "Please check your credentials and try again.",

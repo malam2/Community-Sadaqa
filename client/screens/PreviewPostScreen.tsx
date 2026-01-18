@@ -3,9 +3,9 @@ import {
   View,
   StyleSheet,
   ScrollView,
-  Alert,
   ActivityIndicator,
 } from "react-native";
+import { showAlert } from "@/lib/alert";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
@@ -57,7 +57,7 @@ export default function PreviewPostScreen() {
 
   const handlePublish = async () => {
     if (!user) {
-      Alert.alert("Error", "Please log in to create a post.");
+      showAlert("Error", "Please log in to create a post.");
       return;
     }
 

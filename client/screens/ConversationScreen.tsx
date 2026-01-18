@@ -7,9 +7,9 @@ import {
   Pressable,
   KeyboardAvoidingView,
   Platform,
-  Alert,
   ActivityIndicator,
 } from "react-native";
+import { showAlert, showInfoAlert } from "@/lib/alert";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
@@ -110,19 +110,31 @@ export default function ConversationScreen() {
   const handleSetMeeting = () => {
     if (!meetingInfo) return;
 
-    // Show meeting place picker
-    const options = meetingInfo.suggestedPlaces.map((place) => ({
-      text: place,
-      onPress: () => confirmMeetingLocation(place),
-    }));
+    // Show meeting place picker - use a simpler approach for web compatibility
+    if (Platform.OS === "web") {
+      const place = window.prompt(
+        "Choose a meeting location:\n\n" +
+          meetingInfo.suggestedPlaces.join("\n") +
+          "\n\nEnter location:",
+        meetingInfo.suggestedPlaces[0],
+      );
+      if (place) {
+        confirmMeetingLocation(place);
+      }
+    } else {
+      const options = meetingInfo.suggestedPlaces.map((place) => ({
+        text: place,
+        onPress: () => confirmMeetingLocation(place),
+      }));
 
-    options.push({ text: "Cancel", style: "cancel" } as any);
+      options.push({ text: "Cancel", style: "cancel" } as any);
 
-    Alert.alert(
-      "Set Meeting Location",
-      "Choose a safe, public place to meet:",
-      options.slice(0, 8), // Limit to 8 options for Alert
-    );
+      showAlert(
+        "Set Meeting Location",
+        "Choose a safe, public place to meet:",
+        options.slice(0, 8),
+      );
+    }
   };
 
   const confirmMeetingLocation = async (location: string) => {
@@ -149,10 +161,9 @@ export default function ConversationScreen() {
   const handleShowSafetyTips = () => {
     if (!meetingInfo) return;
 
-    Alert.alert(
+    showInfoAlert(
       "Safety Tips for Meetups",
       meetingInfo.safetyTips.join("\n\n"),
-      [{ text: "Got it" }],
     );
   };
 

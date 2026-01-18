@@ -3,9 +3,9 @@ import {
   View,
   StyleSheet,
   Pressable,
-  Alert,
   ActivityIndicator,
 } from "react-native";
+import { showAlert } from "@/lib/alert";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -51,7 +51,7 @@ export default function SignupScreen() {
     if (!isFormValid) return;
 
     if (password !== confirmPassword) {
-      Alert.alert("Error", "Passwords do not match");
+      showAlert("Error", "Passwords do not match");
       return;
     }
 
@@ -79,7 +79,7 @@ export default function SignupScreen() {
       setUser(user);
     } catch (error) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert(
+      showAlert(
         "Signup Failed",
         getErrorMessage(error) || "Please try again.",
       );

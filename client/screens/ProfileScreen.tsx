@@ -3,13 +3,12 @@ import {
   View,
   StyleSheet,
   Pressable,
-  Alert,
   FlatList,
   Modal,
   TextInput,
-  Platform,
   ActivityIndicator,
 } from "react-native";
+import { showConfirmAlert } from "@/lib/alert";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
@@ -132,17 +131,15 @@ export default function ProfileScreen() {
   };
 
   const handleLogout = () => {
-    Alert.alert("Sign Out", "Are you sure you want to sign out?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Sign Out",
-        style: "destructive",
-        onPress: async () => {
-          await logout();
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        },
+    showConfirmAlert(
+      "Sign Out",
+      "Are you sure you want to sign out?",
+      async () => {
+        await logout();
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       },
-    ]);
+      "Sign Out",
+    );
   };
 
   const handlePostPress = (post: Post) => {

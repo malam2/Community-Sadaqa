@@ -3,11 +3,12 @@ import {
   View,
   StyleSheet,
   ScrollView,
-  Alert,
   Pressable,
   Linking,
+  Platform,
   ActivityIndicator,
 } from "react-native";
+import { showAlert, showConfirmAlert, showInfoAlert } from "@/lib/alert";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
@@ -60,16 +61,11 @@ export default function PostDetailScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     if (isGuest) {
-      Alert.alert(
+      showConfirmAlert(
         "Sign Up Required",
         "Please create an account to message the poster.",
-        [
-          { text: "Cancel", style: "cancel" },
-          {
-            text: "Sign Up",
-            onPress: () => navigation.navigate("Auth" as any),
-          },
-        ],
+        () => navigation.navigate("Auth" as any),
+        "Sign Up",
       );
       return;
     }
@@ -116,14 +112,14 @@ export default function PostDetailScreen() {
         if (canOpen) {
           await Linking.openURL(url);
         } else {
-          Alert.alert(
+          showAlert(
             "Error",
             "Unable to open this contact method on your device.",
           );
         }
       }
     } catch (error) {
-      Alert.alert("Error", "Failed to open contact method.");
+      showAlert("Error", "Failed to open contact method.");
     }
   };
 
@@ -131,16 +127,11 @@ export default function PostDetailScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     if (isGuest) {
-      Alert.alert(
+      showConfirmAlert(
         "Sign Up Required",
         "Please create an account to contact the poster.",
-        [
-          { text: "Cancel", style: "cancel" },
-          {
-            text: "Sign Up",
-            onPress: () => navigation.navigate("Auth" as any),
-          },
-        ],
+        () => navigation.navigate("Auth" as any),
+        "Sign Up",
       );
       return;
     }
@@ -148,6 +139,13 @@ export default function PostDetailScreen() {
     const { contactPreference, contactPhone, contactEmail } = currentPost;
     const hasPhone = !!contactPhone;
     const hasEmail = !!contactEmail;
+
+    // For web platform, use a simpler approach
+    if (Platform.OS === "web") {
+      // Always start with in-app messaging on web
+      handleStartConversation();
+      return;
+    }
 
     // Build contact options - prioritize in-app messaging
     const options: {
@@ -191,7 +189,7 @@ export default function PostDetailScreen() {
 
     options.push({ text: "Cancel", style: "cancel" });
 
-    Alert.alert(
+    showAlert(
       currentPost.type === "request" ? "Offer Help" : "Accept Offer",
       "In-app messaging protects your privacy. How would you like to reach out?",
       options,
@@ -202,37 +200,32 @@ export default function PostDetailScreen() {
     if (!user) return;
 
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    Alert.alert(
+    showConfirmAlert(
       "Mark as Fulfilled",
       "Are you sure you want to mark this post as fulfilled?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Yes, Mark Fulfilled",
-          onPress: async () => {
-            try {
-              const updated = await updateMutation.mutateAsync({
-                id: currentPost.id,
-                userId: user.id,
-                updates: { status: "fulfilled" },
-              });
-              setCurrentPost(updated);
-              Haptics.notificationAsync(
-                Haptics.NotificationFeedbackType.Success,
-              );
-              toast.success(
-                "Post fulfilled",
-                "Thank you for helping your community!",
-              );
-            } catch (error) {
-              toast.error(
-                "Error",
-                getErrorMessage(error) || "Failed to update post.",
-              );
-            }
-          },
-        },
-      ],
+      async () => {
+        try {
+          const updated = await updateMutation.mutateAsync({
+            id: currentPost.id,
+            userId: user.id,
+            updates: { status: "fulfilled" },
+          });
+          setCurrentPost(updated);
+          Haptics.notificationAsync(
+            Haptics.NotificationFeedbackType.Success,
+          );
+          toast.success(
+            "Post fulfilled",
+            "Thank you for helping your community!",
+          );
+        } catch (error) {
+          toast.error(
+            "Error",
+            getErrorMessage(error) || "Failed to update post.",
+          );
+        }
+      },
+      "Yes, Mark Fulfilled",
     );
   };
 
@@ -240,34 +233,28 @@ export default function PostDetailScreen() {
     if (!user) return;
 
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    Alert.alert(
+    showConfirmAlert(
       "Delete Post",
       "Are you sure you want to delete this post? This action cannot be undone.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await deleteMutation.mutateAsync({
-                id: currentPost.id,
-                userId: user.id,
-              });
-              Haptics.notificationAsync(
-                Haptics.NotificationFeedbackType.Success,
-              );
-              toast.success("Post deleted");
-              navigation.goBack();
-            } catch (error) {
-              toast.error(
-                "Error",
-                getErrorMessage(error) || "Failed to delete post.",
-              );
-            }
-          },
-        },
-      ],
+      async () => {
+        try {
+          await deleteMutation.mutateAsync({
+            id: currentPost.id,
+            userId: user.id,
+          });
+          Haptics.notificationAsync(
+            Haptics.NotificationFeedbackType.Success,
+          );
+          toast.success("Post deleted");
+          navigation.goBack();
+        } catch (error) {
+          toast.error(
+            "Error",
+            getErrorMessage(error) || "Failed to delete post.",
+          );
+        }
+      },
+      "Delete",
     );
   };
 

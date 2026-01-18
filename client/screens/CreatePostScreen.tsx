@@ -1,5 +1,6 @@
 import React from "react";
-import { View, StyleSheet, Pressable, Alert } from "react-native";
+import { View, StyleSheet, Pressable } from "react-native";
+import { showAlert } from "@/lib/alert";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useNavigation } from "@react-navigation/native";
@@ -87,7 +88,7 @@ export default function CreatePostScreen() {
 
   const handleNext = () => {
     if (!isFormValid) {
-      Alert.alert("Incomplete Form", "Please fill in all required fields.");
+      showAlert("Incomplete Form", "Please fill in all required fields.");
       return;
     }
 

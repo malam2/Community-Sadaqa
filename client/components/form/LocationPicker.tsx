@@ -1,8 +1,9 @@
 import React from "react";
-import { View, StyleSheet, Pressable, Alert, Platform } from "react-native";
+import { View, StyleSheet, Pressable } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import * as Haptics from "expo-haptics";
+import { showInfoAlert } from "@/lib/alert";
 
 import { ThemedText } from "@/components/primitives/ThemedText";
 import { FormInput } from "@/components/form/FormInput";
@@ -47,10 +48,9 @@ export function LocationPicker({
       // Request permission
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        Alert.alert(
+        showInfoAlert(
           "Permission Denied",
           "Please enable location permissions in your device settings to use this feature.",
-          [{ text: "OK" }],
         );
         return;
       }
@@ -78,10 +78,9 @@ export function LocationPicker({
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (err) {
       console.error("Location error:", err);
-      Alert.alert(
+      showInfoAlert(
         "Location Error",
         "Unable to get your current location. Please try again or enter your location manually.",
-        [{ text: "OK" }],
       );
     } finally {
       setIsLoading(false);

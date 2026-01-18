@@ -3,9 +3,9 @@ import {
   View,
   StyleSheet,
   Pressable,
-  Alert,
   ActivityIndicator,
 } from "react-native";
+import { showAlert } from "@/lib/alert";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
@@ -60,12 +60,12 @@ export default function ReportScreen() {
 
   const handleSubmit = async () => {
     if (!selectedReason) {
-      Alert.alert("Select a Reason", "Please select a reason for your report.");
+      showAlert("Select a Reason", "Please select a reason for your report.");
       return;
     }
 
     if (!user) {
-      Alert.alert("Error", "Please log in to submit a report.");
+      showAlert("Error", "Please log in to submit a report.");
       return;
     }
 
