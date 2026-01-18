@@ -12,7 +12,7 @@ test.describe("Post Creation Flow", () => {
   }) => {
     // Enter as guest
     await page.getByRole("button", { name: /continue as guest/i }).click();
-    await expect(page.getByText(/feed|community/i)).toBeVisible({
+    await expect(page.getByText("Community Feed")).toBeVisible({
       timeout: 10000,
     });
 
@@ -29,12 +29,12 @@ test.describe("Post Creation Flow", () => {
     // Signup first
     const uniqueEmail = `post-test-${Date.now()}@example.com`;
     await page.getByText(/sign up/i).click();
-    await page.getByPlaceholder(/name/i).fill("Post Creator");
-    await page.getByPlaceholder(/email/i).fill(uniqueEmail);
-    await page.getByPlaceholder(/password/i).fill("password123");
-    await page.getByPlaceholder(/confirm/i).fill("password123");
+    await page.getByTestId("signup-name").fill("Post Creator");
+    await page.getByTestId("signup-email").fill(uniqueEmail);
+    await page.getByTestId("signup-password").fill("password123");
+    await page.getByTestId("signup-confirm-password").fill("password123");
     await page.getByRole("button", { name: /create account/i }).click();
-    await expect(page.getByText(/feed|community/i)).toBeVisible({
+    await expect(page.getByText("Community Feed")).toBeVisible({
       timeout: 15000,
     });
 
@@ -88,12 +88,12 @@ test.describe("Post Creation Flow", () => {
     // Signup first
     const uniqueEmail = `offer-test-${Date.now()}@example.com`;
     await page.getByText(/sign up/i).click();
-    await page.getByPlaceholder(/name/i).fill("Offer Creator");
-    await page.getByPlaceholder(/email/i).fill(uniqueEmail);
-    await page.getByPlaceholder(/password/i).fill("password123");
-    await page.getByPlaceholder(/confirm/i).fill("password123");
+    await page.getByTestId("signup-name").fill("Offer Creator");
+    await page.getByTestId("signup-email").fill(uniqueEmail);
+    await page.getByTestId("signup-password").fill("password123");
+    await page.getByTestId("signup-confirm-password").fill("password123");
     await page.getByRole("button", { name: /create account/i }).click();
-    await expect(page.getByText(/feed|community/i)).toBeVisible({
+    await expect(page.getByText("Community Feed")).toBeVisible({
       timeout: 15000,
     });
 

@@ -134,7 +134,7 @@ export default function SignupScreen() {
             placeholder="How you'll appear to others"
             autoCapitalize="words"
             autoComplete="name"
-            testID="input-name"
+            testID="signup-name"
           />
 
           <FormInput
@@ -145,7 +145,7 @@ export default function SignupScreen() {
             keyboardType="email-address"
             autoCapitalize="none"
             autoComplete="email"
-            testID="input-email"
+            testID="signup-email"
           />
 
           <FormInput
@@ -155,7 +155,7 @@ export default function SignupScreen() {
             placeholder="At least 6 characters"
             secureTextEntry
             autoComplete="new-password"
-            testID="input-password"
+            testID="signup-password"
           />
 
           <FormInput
@@ -170,7 +170,7 @@ export default function SignupScreen() {
                 ? "Passwords do not match"
                 : undefined
             }
-            testID="input-confirm-password"
+            testID="signup-confirm-password"
           />
 
           <View style={styles.locationSection}>

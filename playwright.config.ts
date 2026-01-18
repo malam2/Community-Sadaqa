@@ -41,7 +41,7 @@ export default defineConfig({
     },
     {
       command:
-        "EXPO_PUBLIC_DOMAIN=localhost:3001 npx expo start --web --localhost --port 8081",
+        "EXPO_NO_DEPENDENCY_VALIDATION=1 EXPO_PUBLIC_DOMAIN=localhost:3001 npx expo start --web --port 8081",
       url: "http://localhost:8081",
       timeout: 120000,
       reuseExistingServer: !process.env.CI,

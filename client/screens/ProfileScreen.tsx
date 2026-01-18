@@ -37,7 +37,7 @@ import { Post } from "@/types/post";
 import { updateDisplayName, updateUserLocation } from "@/lib/auth";
 import { getErrorMessage } from "@/lib/errorUtils";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
-import { Location, formatLocation } from "@/types/location";
+import { UserLocation, formatLocation } from "@/types/location";
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
@@ -59,18 +59,18 @@ export default function ProfileScreen() {
 
   // Location editing state
   const [showLocationModal, setShowLocationModal] = React.useState(false);
-  const [newLocation, setNewLocation] = React.useState<Location | null>(null);
+  const [newLocation, setNewLocation] = React.useState<UserLocation | null>(null);
   const [isSavingLocation, setIsSavingLocation] = React.useState(false);
 
   // Get current user location for display
-  const userLocation: Location | null = user?.city
+  const userLocation: UserLocation | null = user?.city
     ? {
         city: user.city,
         state: user.state,
         zipCode: user.zipCode,
         latitude: user.latitude,
         longitude: user.longitude,
-        radius: user.locationRadius,
+        locationRadius: user.locationRadius,
       }
     : null;
 
@@ -98,7 +98,7 @@ export default function ProfileScreen() {
             zipCode: newLocation.zipCode,
             latitude: newLocation.latitude,
             longitude: newLocation.longitude,
-            locationRadius: newLocation.radius,
+            locationRadius: newLocation.locationRadius,
           }
         : {};
 
@@ -407,7 +407,7 @@ export default function ProfileScreen() {
             </ThemedText>
             
             <LocationPicker
-              value={newLocation}
+              value={newLocation ?? {}}
               onChange={setNewLocation}
               showRadius
             />

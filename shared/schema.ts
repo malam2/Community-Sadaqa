@@ -198,4 +198,3 @@ export type Post = typeof posts.$inferSelect;
 export type Conversation = typeof conversations.$inferSelect;
 export type Message = typeof messages.$inferSelect;
 export type Report = typeof reports.$inferSelect;
-export type Report = typeof reports.$inferSelect;

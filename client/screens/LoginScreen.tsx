@@ -127,7 +127,7 @@ export default function LoginScreen() {
             keyboardType="email-address"
             autoCapitalize="none"
             autoComplete="email"
-            testID="input-email"
+            testID="login-email"
           />
 
           <FormInput
@@ -137,7 +137,7 @@ export default function LoginScreen() {
             placeholder="Enter your password"
             secureTextEntry
             autoComplete="password"
-            testID="input-password"
+            testID="login-password"
           />
 
           <Button

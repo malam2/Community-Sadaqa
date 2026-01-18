@@ -8,7 +8,7 @@ test.describe("Feed and Filtering", () => {
 
     // Enter as guest for browsing tests
     await page.getByRole("button", { name: /continue as guest/i }).click();
-    await expect(page.getByText(/feed|community/i)).toBeVisible({
+    await expect(page.getByText("Community Feed")).toBeVisible({
       timeout: 10000,
     });
   });

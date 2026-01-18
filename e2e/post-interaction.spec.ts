@@ -15,12 +15,12 @@ test.describe("Post Interaction Flow", () => {
 
     // Signup
     await page.getByText(/sign up/i).click();
-    await page.getByPlaceholder(/name/i).fill("Interaction Tester");
-    await page.getByPlaceholder(/email/i).fill(testEmail);
-    await page.getByPlaceholder(/password/i).fill("password123");
-    await page.getByPlaceholder(/confirm/i).fill("password123");
+    await page.getByTestId("signup-name").fill("Interaction Tester");
+    await page.getByTestId("signup-email").fill(testEmail);
+    await page.getByTestId("signup-password").fill("password123");
+    await page.getByTestId("signup-confirm-password").fill("password123");
     await page.getByRole("button", { name: /create account/i }).click();
-    await expect(page.getByText(/feed|community/i)).toBeVisible({
+    await expect(page.getByText("Community Feed")).toBeVisible({
       timeout: 15000,
     });
   });
