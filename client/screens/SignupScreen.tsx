@@ -12,13 +12,16 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 
-import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
-import { ThemedText } from "@/components/ThemedText";
-import { FormInput } from "@/components/FormInput";
-import { Button } from "@/components/Button";
+import {
+  KeyboardAwareScrollViewCompat,
+  ThemedText,
+  FormInput,
+  Button,
+} from "@/components";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
 import { signup } from "@/lib/auth";
+import { getErrorMessage } from "@/lib/errorUtils";
 import { Spacing } from "@/constants/theme";
 import { AuthStackParamList } from "@/navigation/AuthStackNavigator";
 
@@ -54,9 +57,12 @@ export default function SignupScreen() {
       const user = await signup(email.trim(), password, displayName.trim());
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setUser(user);
-    } catch (error: any) {
+    } catch (error) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert("Signup Failed", error.message || "Please try again.");
+      Alert.alert(
+        "Signup Failed",
+        getErrorMessage(error) || "Please try again.",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -92,7 +98,8 @@ export default function SignupScreen() {
             type="small"
             style={[styles.quoteText, { color: theme.textTertiary }]}
           >
-            Many want to help but can't find a way. Many need help but find it hard to ask. We bridge that gap.
+            Many want to help but can't find a way. Many need help but find it
+            hard to ask. We bridge that gap.
           </ThemedText>
         </Animated.View>
 

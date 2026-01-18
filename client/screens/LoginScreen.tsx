@@ -13,13 +13,16 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 
-import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
-import { ThemedText } from "@/components/ThemedText";
-import { FormInput } from "@/components/FormInput";
-import { Button } from "@/components/Button";
+import {
+  KeyboardAwareScrollViewCompat,
+  ThemedText,
+  FormInput,
+  Button,
+} from "@/components";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
 import { login } from "@/lib/auth";
+import { getErrorMessage } from "@/lib/errorUtils";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { AuthStackParamList } from "@/navigation/AuthStackNavigator";
 
@@ -45,11 +48,12 @@ export default function LoginScreen() {
       const user = await login(email.trim(), password);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setUser(user);
-    } catch (error: any) {
+    } catch (error) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Alert.alert(
         "Login Failed",
-        error.message || "Please check your credentials and try again.",
+        getErrorMessage(error) ||
+          "Please check your credentials and try again.",
       );
     } finally {
       setIsLoading(false);

@@ -7,8 +7,8 @@ import Animated, {
 } from "react-native-reanimated";
 import { Feather } from "@expo/vector-icons";
 
-import { ThemedText } from "@/components/ThemedText";
-import { Badge } from "@/components/Badge";
+import { ThemedText } from "@/components/primitives/ThemedText";
+import { Badge } from "@/components/ui/Badge";
 import { useTheme } from "@/hooks/useTheme";
 import { BorderRadius, Spacing, Shadows } from "@/constants/theme";
 import { Post, getCategoryLabel, getTimeAgo } from "@/types/post";

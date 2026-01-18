@@ -5,7 +5,7 @@ import { Feather } from "@expo/vector-icons";
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 
 import { useTheme } from "@/hooks/useTheme";
-import { ThemedText } from "@/components/ThemedText";
+import { ThemedText } from "@/components/primitives/ThemedText";
 import { Spacing, BorderRadius } from "@/constants/theme";
 
 interface WelcomeBannerProps {
@@ -29,21 +29,36 @@ export function WelcomeBanner({
           style={[
             styles.collapsedContainer,
             {
-              backgroundColor: isDark ? theme.primaryLight : theme.primaryLight,
-              borderColor: theme.primary,
+              backgroundColor: isDark
+                ? theme.backgroundSecondary
+                : theme.backgroundSecondary,
+              borderColor: theme.border,
             },
           ]}
         >
           <View style={styles.collapsedContent}>
-            <View style={styles.iconContainer}>
+            <View
+              style={[
+                styles.iconContainer,
+                { backgroundColor: theme.primaryLight },
+              ]}
+            >
               <Feather name="heart" size={16} color={theme.primary} />
             </View>
             <ThemedText
-              style={[styles.collapsedText, { color: theme.primary }]}
+              type="h4"
+              style={[
+                styles.collapsedText,
+                { color: theme.text, textAlign: "center", flex: 1 },
+              ]}
             >
-              One Ummah — In these days, we have each other
+              One Ummah
             </ThemedText>
-            <Feather name="chevron-down" size={18} color={theme.primary} />
+            <Feather
+              name="chevron-down"
+              size={18}
+              color={theme.textSecondary}
+            />
           </View>
         </Animated.View>
       </Pressable>
@@ -119,7 +134,9 @@ export function WelcomeBanner({
           <ThemedText
             style={[styles.mission, { color: isDark ? "#D1FAE5" : "#065F46" }]}
           >
-            Many want to help but can't find a way. Many need help but find it hard to ask. One Ummah bridges that gap — building a community where neighbors become family, and no one stands alone.
+            Many want to help but can't find a way. Many need help but find it
+            hard to ask. One Ummah bridges that gap — building a community where
+            neighbors become family, and no one stands alone.
           </ThemedText>
         </View>
 

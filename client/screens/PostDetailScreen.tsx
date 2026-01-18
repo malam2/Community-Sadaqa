@@ -14,13 +14,11 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 
-import { ThemedText } from "@/components/ThemedText";
-import { Badge } from "@/components/Badge";
-import { Button } from "@/components/Button";
-import { toast } from "@/components/Toast";
+import { ThemedText, Badge, Button, toast } from "@/components";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUpdatePostMutation, useDeletePostMutation } from "@/hooks/queries";
+import { getErrorMessage } from "@/lib/errorUtils";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import {
   Post,
@@ -192,8 +190,11 @@ export default function PostDetailScreen() {
                 "Post fulfilled",
                 "Thank you for helping your community!",
               );
-            } catch (error: any) {
-              toast.error("Error", error.message || "Failed to update post.");
+            } catch (error) {
+              toast.error(
+                "Error",
+                getErrorMessage(error) || "Failed to update post.",
+              );
             }
           },
         },
@@ -224,8 +225,11 @@ export default function PostDetailScreen() {
               );
               toast.success("Post deleted");
               navigation.goBack();
-            } catch (error: any) {
-              toast.error("Error", error.message || "Failed to delete post.");
+            } catch (error) {
+              toast.error(
+                "Error",
+                getErrorMessage(error) || "Failed to delete post.",
+              );
             }
           },
         },

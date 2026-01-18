@@ -10,7 +10,7 @@ import Animated, {
 import * as Haptics from "expo-haptics";
 
 import { useTheme } from "@/hooks/useTheme";
-import { ThemedText } from "@/components/ThemedText";
+import { ThemedText } from "@/components/primitives/ThemedText";
 import { Spacing, BorderRadius } from "@/constants/theme";
 
 interface Quote {

@@ -12,13 +12,11 @@ import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
 
-import { ThemedText } from "@/components/ThemedText";
-import { PostCard } from "@/components/PostCard";
-import { Button } from "@/components/Button";
-import { toast } from "@/components/Toast";
+import { ThemedText, PostCard, Button, toast } from "@/components";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCreatePostMutation } from "@/hooks/queries";
+import { getErrorMessage } from "@/lib/errorUtils";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { Post } from "@/types/post";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
@@ -81,8 +79,11 @@ export default function PreviewPostScreen() {
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       navigation.navigate("Success", { type: postData.type });
-    } catch (error: any) {
-      toast.error("Failed to publish", error.message || "Please try again.");
+    } catch (error) {
+      toast.error(
+        "Failed to publish",
+        getErrorMessage(error) || "Please try again.",
+      );
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
   };

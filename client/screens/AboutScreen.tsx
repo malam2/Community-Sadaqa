@@ -1,14 +1,12 @@
 import React from "react";
-import { View, StyleSheet, ScrollView, Pressable, Linking } from "react-native";
+import { View, StyleSheet, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { useTheme } from "@/hooks/useTheme";
-import { ThemedText } from "@/components/ThemedText";
-import { IslamicQuote, ISLAMIC_QUOTES } from "@/components/IslamicQuote";
-import { Button } from "@/components/Button";
+import { ThemedText, IslamicQuote, ISLAMIC_QUOTES } from "@/components";
 import { Spacing, BorderRadius } from "@/constants/theme";
 
 interface AboutScreenProps {
@@ -50,17 +48,20 @@ export default function AboutScreen({ onClose }: AboutScreenProps) {
     {
       step: "1",
       title: "Share Your Need or Offer",
-      description: "Whether you need a ride, have extra food, or can offer your time — post it here.",
+      description:
+        "Whether you need a ride, have extra food, or can offer your time — post it here.",
     },
     {
       step: "2",
       title: "Connect Directly",
-      description: "No bureaucracy. Real people helping real people. Browse and reach out.",
+      description:
+        "No bureaucracy. Real people helping real people. Browse and reach out.",
     },
     {
       step: "3",
       title: "Build Lasting Bonds",
-      description: "Every exchange strengthens our community. Today's stranger is tomorrow's friend.",
+      description:
+        "Every exchange strengthens our community. Today's stranger is tomorrow's friend.",
     },
   ];
 
@@ -70,7 +71,10 @@ export default function AboutScreen({ onClose }: AboutScreenProps) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingTop: insets.top + Spacing.lg, paddingBottom: insets.bottom + Spacing.xl },
+          {
+            paddingTop: insets.top + Spacing.lg,
+            paddingBottom: insets.bottom + Spacing.xl,
+          },
         ]}
       >
         {/* Hero Section */}
@@ -94,38 +98,73 @@ export default function AboutScreen({ onClose }: AboutScreenProps) {
             </View>
             <ThemedText
               type="h1"
-              style={[styles.heroTitle, { color: isDark ? "#F0FDF4" : "#064E3B" }]}
+              style={[
+                styles.heroTitle,
+                { color: isDark ? "#F0FDF4" : "#064E3B" },
+              ]}
             >
               One Ummah
             </ThemedText>
             <ThemedText
-              style={[styles.heroSubtitle, { color: isDark ? "#A7F3D0" : "#047857" }]}
+              style={[
+                styles.heroSubtitle,
+                { color: isDark ? "#A7F3D0" : "#047857" },
+              ]}
             >
               In These Days, We Have Each Other
             </ThemedText>
             <ThemedText
-              style={[styles.heroDescription, { color: isDark ? "#D1FAE5" : "#065F46" }]}
+              style={[
+                styles.heroDescription,
+                { color: isDark ? "#D1FAE5" : "#065F46" },
+              ]}
             >
-              A non-profit platform where those eager to help find those in need, and those in need find the courage to ask. Together, we're building a community that can stand up to anything.
+              A non-profit platform where those eager to help find those in
+              need, and those in need find the courage to ask. Together, we're
+              building a community that can stand up to anything.
             </ThemedText>
           </LinearGradient>
         </Animated.View>
 
         {/* Mission Quote */}
         <Animated.View entering={FadeInDown.delay(100).duration(400)}>
-          <View style={[styles.missionCard, { backgroundColor: theme.backgroundDefault, borderColor: theme.border }]}>
-            <ThemedText type="h3" style={[styles.sectionTitle, { color: theme.text }]}>
+          <View
+            style={[
+              styles.missionCard,
+              {
+                backgroundColor: theme.backgroundDefault,
+                borderColor: theme.border,
+              },
+            ]}
+          >
+            <ThemedText
+              type="h3"
+              style={[styles.sectionTitle, { color: theme.text }]}
+            >
               Why One Ummah? 🎯
             </ThemedText>
-            <ThemedText style={[styles.missionText, { color: theme.textSecondary }]}>
-              Many people are eager to help but can't find a centralized way to do so. At the same time, many need help but find it hard to ask directly. One Ummah bridges that gap — creating a space where giving is celebrated and asking is honored.{"\n\n"}Our ultimate vision: A strong community where members know each other, support each other, and can rise together through any challenge.
+            <ThemedText
+              style={[styles.missionText, { color: theme.textSecondary }]}
+            >
+              Many people are eager to help but can't find a centralized way to
+              do so. At the same time, many need help but find it hard to ask
+              directly. One Ummah bridges that gap — creating a space where
+              giving is celebrated and asking is honored.{"\n\n"}Our ultimate
+              vision: A strong community where members know each other, support
+              each other, and can rise together through any challenge.
             </ThemedText>
           </View>
         </Animated.View>
 
         {/* Islamic Wisdom */}
         <Animated.View entering={FadeInDown.delay(150).duration(400)}>
-          <ThemedText type="h3" style={[styles.sectionTitle, { color: theme.text, marginBottom: Spacing.md }]}>
+          <ThemedText
+            type="h3"
+            style={[
+              styles.sectionTitle,
+              { color: theme.text, marginBottom: Spacing.md },
+            ]}
+          >
             Islamic Wisdom 📖
           </ThemedText>
           <IslamicQuote variant="card" showRefresh />
@@ -133,7 +172,10 @@ export default function AboutScreen({ onClose }: AboutScreenProps) {
 
         {/* Core Principles */}
         <Animated.View entering={FadeInDown.delay(200).duration(400)}>
-          <ThemedText type="h3" style={[styles.sectionTitle, { color: theme.text }]}>
+          <ThemedText
+            type="h3"
+            style={[styles.sectionTitle, { color: theme.text }]}
+          >
             Our Principles 💚
           </ThemedText>
           <View style={styles.principlesGrid}>
@@ -142,7 +184,10 @@ export default function AboutScreen({ onClose }: AboutScreenProps) {
                 key={principle.title}
                 style={[
                   styles.principleCard,
-                  { backgroundColor: theme.backgroundDefault, borderColor: theme.border },
+                  {
+                    backgroundColor: theme.backgroundDefault,
+                    borderColor: theme.border,
+                  },
                 ]}
               >
                 <View
@@ -151,12 +196,24 @@ export default function AboutScreen({ onClose }: AboutScreenProps) {
                     { backgroundColor: theme.primaryLight },
                   ]}
                 >
-                  <Feather name={principle.icon} size={20} color={theme.primary} />
+                  <Feather
+                    name={principle.icon}
+                    size={20}
+                    color={theme.primary}
+                  />
                 </View>
-                <ThemedText type="h4" style={[styles.principleTitle, { color: theme.text }]}>
+                <ThemedText
+                  type="h4"
+                  style={[styles.principleTitle, { color: theme.text }]}
+                >
                   {principle.title}
                 </ThemedText>
-                <ThemedText style={[styles.principleDescription, { color: theme.textSecondary }]}>
+                <ThemedText
+                  style={[
+                    styles.principleDescription,
+                    { color: theme.textSecondary },
+                  ]}
+                >
                   {principle.description}
                 </ThemedText>
               </View>
@@ -166,7 +223,10 @@ export default function AboutScreen({ onClose }: AboutScreenProps) {
 
         {/* How It Works */}
         <Animated.View entering={FadeInDown.delay(250).duration(400)}>
-          <ThemedText type="h3" style={[styles.sectionTitle, { color: theme.text }]}>
+          <ThemedText
+            type="h3"
+            style={[styles.sectionTitle, { color: theme.text }]}
+          >
             How It Works 🤝
           </ThemedText>
           {howItWorks.map((item, index) => (
@@ -174,22 +234,32 @@ export default function AboutScreen({ onClose }: AboutScreenProps) {
               key={item.step}
               style={[
                 styles.stepCard,
-                { backgroundColor: theme.backgroundDefault, borderColor: theme.border },
+                {
+                  backgroundColor: theme.backgroundDefault,
+                  borderColor: theme.border,
+                },
               ]}
             >
               <View
-                style={[
-                  styles.stepNumber,
-                  { backgroundColor: theme.primary },
-                ]}
+                style={[styles.stepNumber, { backgroundColor: theme.primary }]}
               >
-                <ThemedText style={styles.stepNumberText}>{item.step}</ThemedText>
+                <ThemedText style={styles.stepNumberText}>
+                  {item.step}
+                </ThemedText>
               </View>
               <View style={styles.stepContent}>
-                <ThemedText type="h4" style={[styles.stepTitle, { color: theme.text }]}>
+                <ThemedText
+                  type="h4"
+                  style={[styles.stepTitle, { color: theme.text }]}
+                >
                   {item.title}
                 </ThemedText>
-                <ThemedText style={[styles.stepDescription, { color: theme.textSecondary }]}>
+                <ThemedText
+                  style={[
+                    styles.stepDescription,
+                    { color: theme.textSecondary },
+                  ]}
+                >
                   {item.description}
                 </ThemedText>
               </View>
@@ -199,7 +269,10 @@ export default function AboutScreen({ onClose }: AboutScreenProps) {
 
         {/* More Quotes */}
         <Animated.View entering={FadeInDown.delay(300).duration(400)}>
-          <ThemedText type="h3" style={[styles.sectionTitle, { color: theme.text }]}>
+          <ThemedText
+            type="h3"
+            style={[styles.sectionTitle, { color: theme.text }]}
+          >
             Words of Inspiration ✨
           </ThemedText>
           <View style={styles.quotesGrid}>
@@ -209,25 +282,47 @@ export default function AboutScreen({ onClose }: AboutScreenProps) {
                 style={[
                   styles.miniQuoteCard,
                   {
-                    backgroundColor: index % 2 === 0
-                      ? (isDark ? "#064E3B" : "#ECFDF5")
-                      : (isDark ? "#1E293B" : "#FFFBEB"),
-                    borderColor: index % 2 === 0
-                      ? (isDark ? "#10B981" : "#A7F3D0")
-                      : (isDark ? "#FBBF24" : "#FDE68A"),
+                    backgroundColor:
+                      index % 2 === 0
+                        ? isDark
+                          ? "#064E3B"
+                          : "#ECFDF5"
+                        : isDark
+                          ? "#1E293B"
+                          : "#FFFBEB",
+                    borderColor:
+                      index % 2 === 0
+                        ? isDark
+                          ? "#10B981"
+                          : "#A7F3D0"
+                        : isDark
+                          ? "#FBBF24"
+                          : "#FDE68A",
                   },
                 ]}
               >
                 <ThemedText
                   style={[
                     styles.miniQuoteText,
-                    { color: index % 2 === 0 ? theme.primary : (isDark ? "#FBBF24" : "#D97706") },
+                    {
+                      color:
+                        index % 2 === 0
+                          ? theme.primary
+                          : isDark
+                            ? "#FBBF24"
+                            : "#D97706",
+                    },
                   ]}
                   numberOfLines={3}
                 >
                   "{quote.text}"
                 </ThemedText>
-                <ThemedText style={[styles.miniQuoteSource, { color: theme.textTertiary }]}>
+                <ThemedText
+                  style={[
+                    styles.miniQuoteSource,
+                    { color: theme.textTertiary },
+                  ]}
+                >
                   — {quote.source}
                 </ThemedText>
               </View>
@@ -238,12 +333,32 @@ export default function AboutScreen({ onClose }: AboutScreenProps) {
         {/* Footer */}
         <Animated.View entering={FadeInDown.delay(350).duration(400)}>
           <View style={[styles.footer, { borderColor: theme.border }]}>
-            <ThemedText style={[styles.footerText, { color: theme.textTertiary }]}>
+            <ThemedText
+              style={[styles.footerText, { color: theme.textTertiary }]}
+            >
               One Ummah • A Non-Profit Initiative 💚
             </ThemedText>
-            <ThemedText style={[styles.footerVerse, { color: theme.textSecondary }]}>
-              "The believers are like one body. When one part suffers, the whole body responds."
+            <ThemedText
+              style={[styles.footerVerse, { color: theme.textSecondary }]}
+            >
+              "The believers are like one body. When one part suffers, the whole
+              body responds."
             </ThemedText>
+            <View style={styles.creatorSection}>
+              <ThemedText
+                style={[styles.creatorLabel, { color: theme.textTertiary }]}
+              >
+                Created with ❤️ by
+              </ThemedText>
+              <ThemedText style={[styles.creatorName, { color: theme.text }]}>
+                Mohammed Alam
+              </ThemedText>
+              <ThemedText
+                style={[styles.creatorLocation, { color: theme.textSecondary }]}
+              >
+                Diamond Bar, CA
+              </ThemedText>
+            </View>
           </View>
         </Animated.View>
       </ScrollView>
@@ -394,5 +509,22 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontStyle: "italic",
     textAlign: "center",
+  },
+  creatorSection: {
+    marginTop: Spacing.lg,
+    alignItems: "center",
+    paddingTop: Spacing.md,
+  },
+  creatorLabel: {
+    fontSize: 12,
+    marginBottom: Spacing.xs,
+  },
+  creatorName: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 2,
+  },
+  creatorLocation: {
+    fontSize: 13,
   },
 });

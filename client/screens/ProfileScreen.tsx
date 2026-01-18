@@ -19,18 +19,22 @@ import { Feather } from "@expo/vector-icons";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 
-import { ThemedText } from "@/components/ThemedText";
-import { PostCard } from "@/components/PostCard";
-import { EmptyState } from "@/components/EmptyState";
-import { Button } from "@/components/Button";
-import { SkeletonFeed, SkeletonProfileHeader } from "@/components/Skeleton";
-import { toast } from "@/components/Toast";
+import {
+  ThemedText,
+  PostCard,
+  EmptyState,
+  Button,
+  SkeletonFeed,
+  SkeletonProfileHeader,
+  toast,
+} from "@/components";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserPostsQuery } from "@/hooks/queries";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { Post } from "@/types/post";
 import { updateDisplayName } from "@/lib/auth";
+import { getErrorMessage } from "@/lib/errorUtils";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 export default function ProfileScreen() {
@@ -67,8 +71,8 @@ export default function ProfileScreen() {
       setShowNameModal(false);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       toast.success("Name updated", "Your display name has been changed.");
-    } catch (error: any) {
-      toast.error("Error", error.message || "Failed to update name.");
+    } catch (error) {
+      toast.error("Error", getErrorMessage(error) || "Failed to update name.");
     } finally {
       setIsSavingName(false);
     }

@@ -7,15 +7,17 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 
-import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
-import { SegmentedControl } from "@/components/SegmentedControl";
-import { FormInput } from "@/components/FormInput";
-import { Dropdown } from "@/components/Dropdown";
-import { Toggle } from "@/components/Toggle";
-import { Button } from "@/components/Button";
-import { ThemedText } from "@/components/ThemedText";
-import { EmptyState } from "@/components/EmptyState";
-import { IslamicQuote } from "@/components/IslamicQuote";
+import {
+  KeyboardAwareScrollViewCompat,
+  SegmentedControl,
+  FormInput,
+  Dropdown,
+  Toggle,
+  Button,
+  ThemedText,
+  EmptyState,
+  IslamicQuote,
+} from "@/components";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
 import { Spacing, BorderRadius } from "@/constants/theme";

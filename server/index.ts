@@ -201,13 +201,13 @@ function configureExpoAndLanding(app: express.Application) {
   });
 
   app.use("/assets", express.static(path.resolve(process.cwd(), "assets")));
-
+  
   // Serve the built Expo web app in production
   const distPath = path.resolve(process.cwd(), "dist");
   if (fs.existsSync(distPath)) {
     log("Serving built web app from /dist");
     app.use(express.static(distPath));
-
+    
     // Serve index.html for all non-API routes (SPA routing)
     // Express 5 uses {*path} instead of * for wildcard
     app.get("/{*path}", (req: Request, res: Response, next: NextFunction) => {

@@ -4,7 +4,7 @@ import { Feather } from "@expo/vector-icons";
 import Animated, { FadeInRight } from "react-native-reanimated";
 
 import { useTheme } from "@/hooks/useTheme";
-import { ThemedText } from "@/components/ThemedText";
+import { ThemedText } from "@/components/primitives/ThemedText";
 import { Spacing, BorderRadius } from "@/constants/theme";
 
 interface QuickAction {

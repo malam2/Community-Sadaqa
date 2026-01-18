@@ -7,7 +7,7 @@ test.describe("Post Interaction Flow", () => {
   test.beforeEach(async ({ page }) => {
     await page.context().clearCookies();
     await page.goto("/");
-    await expect(page.getByText("Local Ummah")).toBeVisible({ timeout: 30000 });
+    await expect(page.getByText("One Ummah")).toBeVisible({ timeout: 30000 });
 
     // Create a unique user and post for each test
     testEmail = `interaction-${Date.now()}@example.com`;

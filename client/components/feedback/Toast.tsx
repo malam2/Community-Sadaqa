@@ -3,7 +3,7 @@ import { View, StyleSheet, Platform } from "react-native";
 import Toast, { ToastConfig } from "react-native-toast-message";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/hooks/useTheme";
-import { ThemedText } from "@/components/ThemedText";
+import { ThemedText } from "@/components/primitives/ThemedText";
 import { BorderRadius, Spacing } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 

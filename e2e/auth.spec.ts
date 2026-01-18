@@ -9,8 +9,7 @@ test.describe("Authentication Flow", () => {
 
   test("should display login screen with guest option", async ({ page }) => {
     // Wait for the app to load
-    await expect(page.getByText("Local Ummah")).toBeVisible({ timeout: 30000 });
-    await expect(page.getByText("Community helping community")).toBeVisible();
+    await expect(page.getByText("One Ummah")).toBeVisible({ timeout: 30000 });
 
     // Check login form elements
     await expect(page.getByPlaceholder(/email/i)).toBeVisible();
@@ -23,7 +22,7 @@ test.describe("Authentication Flow", () => {
   });
 
   test("should allow guest mode access to feed", async ({ page }) => {
-    await expect(page.getByText("Local Ummah")).toBeVisible({ timeout: 30000 });
+    await expect(page.getByText("One Ummah")).toBeVisible({ timeout: 30000 });
 
     // Click continue as guest
     await page.getByRole("button", { name: /continue as guest/i }).click();
@@ -35,7 +34,7 @@ test.describe("Authentication Flow", () => {
   });
 
   test("should signup new user successfully", async ({ page }) => {
-    await expect(page.getByText("Local Ummah")).toBeVisible({ timeout: 30000 });
+    await expect(page.getByText("One Ummah")).toBeVisible({ timeout: 30000 });
 
     // Navigate to signup
     await page.getByText(/sign up/i).click();
@@ -80,7 +79,7 @@ test.describe("Authentication Flow", () => {
     await page.getByRole("button", { name: /log out|sign out/i }).click();
 
     // Now login with same credentials
-    await expect(page.getByText("Local Ummah")).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText("One Ummah")).toBeVisible({ timeout: 10000 });
     await page.getByPlaceholder(/email/i).fill(uniqueEmail);
     await page.getByPlaceholder(/password/i).fill("password123");
     await page.getByRole("button", { name: /log in|sign in/i }).click();

@@ -1,7 +1,7 @@
 import React from "react";
 import { View, StyleSheet, Image } from "react-native";
 
-import { ThemedText } from "@/components/ThemedText";
+import { ThemedText } from "@/components/primitives/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { BorderRadius, Spacing } from "@/constants/theme";
 
@@ -69,7 +69,7 @@ export function Badge({ variant, small = false }: BadgeProps) {
     >
       {variant === "anonymous" ? (
         <Image
-          source={require("../../assets/images/anonymous-indicator.png")}
+          source={require("../../../assets/images/anonymous-indicator.png")}
           style={small ? styles.iconSmall : styles.icon}
           resizeMode="contain"
         />

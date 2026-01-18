@@ -11,8 +11,7 @@ import { queryClient } from "@/lib/query-client";
 
 import { AuthProvider } from "@/contexts/AuthContext";
 import RootStackNavigator from "@/navigation/RootStackNavigator";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { ToastProvider } from "@/components/Toast";
+import { ErrorBoundary, ToastProvider } from "@/components";
 
 export default function App() {
   return (

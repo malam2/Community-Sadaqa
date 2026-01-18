@@ -113,9 +113,13 @@ export default function MainTabNavigator() {
         name="FeedTab"
         component={FeedStackNavigator}
         options={{
-          title: "Feed",
-          tabBarIcon: ({ color, size }) => (
-            <Feather name="home" size={size} color={color} />
+          tabBarLabel: () => null,
+          tabBarIcon: ({ focused, size }) => (
+            <Feather
+              name="home"
+              size={size}
+              color={focused ? theme.primary : theme.text}
+            />
           ),
         }}
       />
@@ -136,9 +140,13 @@ export default function MainTabNavigator() {
         name="ProfileTab"
         component={ProfileStackNavigator}
         options={{
-          title: "Profile",
-          tabBarIcon: ({ color, size }) => (
-            <Feather name="user" size={size} color={color} />
+          tabBarLabel: () => null,
+          tabBarIcon: ({ focused, size }) => (
+            <Feather
+              name="user"
+              size={size}
+              color={focused ? theme.primary : theme.text}
+            />
           ),
         }}
       />

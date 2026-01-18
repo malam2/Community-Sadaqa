@@ -13,14 +13,17 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 
-import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
-import { ThemedText } from "@/components/ThemedText";
-import { FormInput } from "@/components/FormInput";
-import { Button } from "@/components/Button";
-import { toast } from "@/components/Toast";
+import {
+  KeyboardAwareScrollViewCompat,
+  ThemedText,
+  FormInput,
+  Button,
+  toast,
+} from "@/components";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubmitReportMutation } from "@/hooks/queries";
+import { getErrorMessage } from "@/lib/errorUtils";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
@@ -80,8 +83,11 @@ export default function ReportScreen() {
         "Thank you for helping keep our community safe.",
       );
       navigation.goBack();
-    } catch (error: any) {
-      toast.error("Failed to submit", error.message || "Please try again.");
+    } catch (error) {
+      toast.error(
+        "Failed to submit",
+        getErrorMessage(error) || "Please try again.",
+      );
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
   };

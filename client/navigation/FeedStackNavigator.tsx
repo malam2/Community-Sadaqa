@@ -2,7 +2,7 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import FeedScreen from "@/screens/FeedScreen";
-import { HeaderTitle } from "@/components/HeaderTitle";
+import { HeaderTitle } from "@/components";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 
 export type FeedStackParamList = {
@@ -20,7 +20,9 @@ export default function FeedStackNavigator() {
         name="Feed"
         component={FeedScreen}
         options={{
-          headerTitle: () => <HeaderTitle title="One Ummah" subtitle="Together, We Rise 💚" />,
+          headerTitle: () => (
+            <HeaderTitle title="One Ummah" subtitle="Together, We Rise 💚" />
+          ),
         }}
       />
     </Stack.Navigator>

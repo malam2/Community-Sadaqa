@@ -19,14 +19,17 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
-import { FilterChip } from "@/components/FilterChip";
-import { PostCard } from "@/components/PostCard";
-import { EmptyState } from "@/components/EmptyState";
-import { SkeletonFeed } from "@/components/Skeleton";
-import { WelcomeBanner } from "@/components/WelcomeBanner";
-import { IslamicQuote } from "@/components/IslamicQuote";
-import { QuickActions, EncouragementBadge } from "@/components/CommunityWidgets";
-import { ThemedText } from "@/components/ThemedText";
+import {
+  FilterChip,
+  PostCard,
+  EmptyState,
+  SkeletonFeed,
+  WelcomeBanner,
+  IslamicQuote,
+  QuickActions,
+  EncouragementBadge,
+  ThemedText,
+} from "@/components";
 import { Post, PostType, PostCategory, CATEGORIES } from "@/types/post";
 import { usePostsQuery } from "@/hooks/queries";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
@@ -120,7 +123,11 @@ export default function FeedScreen() {
   };
 
   const handleQuickAction = (actionId: string) => {
-    if (actionId === "request" || actionId === "offer" || actionId === "urgent") {
+    if (
+      actionId === "request" ||
+      actionId === "offer" ||
+      actionId === "urgent"
+    ) {
       navigation.navigate("CreatePost");
     }
   };
@@ -197,10 +204,7 @@ export default function FeedScreen() {
         >
           Community Feed
         </ThemedText>
-        <ThemedText
-          type="small"
-          style={{ color: theme.textTertiary }}
-        >
+        <ThemedText type="small" style={{ color: theme.textTertiary }}>
           {posts.length} {posts.length === 1 ? "post" : "posts"}
         </ThemedText>
       </View>

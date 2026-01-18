@@ -11,9 +11,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import Animated, { FadeIn, FadeInUp, ZoomIn } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 
-import { ThemedText } from "@/components/ThemedText";
-import { Button } from "@/components/Button";
-import { IslamicQuote } from "@/components/IslamicQuote";
+import { ThemedText, Button, IslamicQuote } from "@/components";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing } from "@/constants/theme";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
@@ -81,7 +79,10 @@ export default function SuccessScreen() {
         </Animated.View>
 
         {/* Inspirational Quote */}
-        <Animated.View entering={FadeIn.delay(500).duration(400)} style={styles.quoteContainer}>
+        <Animated.View
+          entering={FadeIn.delay(500).duration(400)}
+          style={styles.quoteContainer}
+        >
           <IslamicQuote variant="inline" />
         </Animated.View>
       </View>

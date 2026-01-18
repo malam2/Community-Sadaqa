@@ -67,10 +67,20 @@ echo -e "${GREEN}✓ Container Registry '$CONTAINER_REGISTRY' ready${NC}"
 
 # Step 3: Build and push image to ACR
 echo -e "\n${YELLOW}Step 3: Building and pushing Docker image...${NC}"
+
+# First, get the app URL if it exists, otherwise use a placeholder
+EXISTING_URL=$(az containerapp show --name $CONTAINER_APP_NAME --resource-group $RESOURCE_GROUP --query properties.configuration.ingress.fqdn -o tsv 2>/dev/null || echo "")
+if [ -z "$EXISTING_URL" ]; then
+    DOMAIN_FOR_BUILD="placeholder.azurecontainerapps.io"
+else
+    DOMAIN_FOR_BUILD="$EXISTING_URL"
+fi
+
 az acr build \
     --registry $CONTAINER_REGISTRY \
     --image $IMAGE_NAME:latest \
     --file Dockerfile \
+    --build-arg EXPO_PUBLIC_DOMAIN="$DOMAIN_FOR_BUILD" \
     .
 echo -e "${GREEN}✓ Image pushed to ACR${NC}"
 

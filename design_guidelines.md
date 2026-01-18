@@ -125,39 +125,49 @@
 
 ## Color Palette
 
-**Primary**: `#2D8659` (Forest Green - represents growth, charity, trust)
-**Primary Variant**: `#1F5D3D` (Darker green for pressed states)
+**Inspired by**: Uber's clean contrast, LinkedIn's professional clarity, PayPal's trustworthy feel.
 
-**Background**: `#FAFAF8` (Warm off-white)
+**Primary**: `#0D7A4F` (Forest Green - represents growth, charity, trust)
+**Primary Variant**: `#0A5C3B` (Darker green for pressed states)
+**Primary Light**: `#E6F4ED` (Subtle green tint for backgrounds)
+
+**Background**: `#FFFFFF` (Pure white - Uber style)
 **Surface**: `#FFFFFF` (Pure white for cards)
-**Surface Variant**: `#F5F5F3` (Subtle gray for secondary surfaces)
+**Surface Variant**: `#F7F7F7` (Subtle gray for secondary surfaces - LinkedIn style)
 
-**Text Primary**: `#1A1A1A` (Near black)
-**Text Secondary**: `#666666` (Medium gray)
-**Text Tertiary**: `#999999` (Light gray for metadata)
+**Text Primary**: `#000000` (Pure black - high contrast like Uber)
+**Text Secondary**: `#545454` (Darker gray for better readability)
+**Text Tertiary**: `#767676` (Accessible gray - 4.5:1 contrast ratio)
 
 **Semantic**:
-- Urgent: `#D84315` (Warm red)
-- Success: `#2D8659` (Same as primary)
-- Anonymous Badge: `#5E35B1` (Purple for privacy indicator)
+- Urgent: `#C41E3A` (Deeper red - more serious/trustworthy)
+- Success: `#0D7A4F` (Same as primary)
+- Anonymous Badge: `#5B2D90` (Deeper purple for distinction)
 
-**Accent**: `#FFB74D` (Warm amber for highlights/badges)
+**Accent**: `#B86E00` (Warmer amber - better contrast)
 
 ---
 
 ## Typography
 
+**Design Philosophy**: 
+- Headlines: Bold and impactful like Uber (extra bold weights, tight letter-spacing)
+- Body: Clear and professional like LinkedIn (generous line-height for readability)
+- CTAs: Trust-inspiring like PayPal (semibold for clear actions)
+
 **Font Family**: 
-- Display/Headers: **Nunito** (Google Font - warm, friendly, approachable)
-- Body: **SF Pro** (System font for readability)
+- All text: **System fonts** (-apple-system, SF Pro on iOS, Roboto on Android)
+- This ensures native feel and optimal performance
 
 **Type Scale**:
-- H1 (Screen titles): Nunito Bold, 28px
-- H2 (Section headers): Nunito Bold, 22px
-- H3 (Card titles): Nunito SemiBold, 18px
-- Body: SF Pro Regular, 16px
-- Caption (metadata): SF Pro Regular, 14px
-- Small (timestamps): SF Pro Regular, 12px
+- H1 (Screen titles): 32px, Weight 800, Line-height 40px, Letter-spacing -0.5
+- H2 (Section headers): 26px, Weight 700, Line-height 34px, Letter-spacing -0.3
+- H3 (Card titles): 20px, Weight 600, Line-height 28px, Letter-spacing -0.2
+- H4 (Subtitles): 17px, Weight 600, Line-height 24px
+- Body: 16px, Weight 400, Line-height 26px, Letter-spacing 0.1
+- Small: 14px, Weight 400, Line-height 22px
+- Caption (metadata): 12px, Weight 500, Line-height 18px
+- Label (uppercase): 13px, Weight 600, Letter-spacing 0.4
 
 ---
 
@@ -168,17 +178,21 @@
 - Buttons: Reduce opacity to 0.7 when pressed
 - Filter chips: Scale to 1.05 and increase shadow when selected
 
-**Floating Action Buttons**: Use subtle drop shadow:
-- shadowOffset: {width: 0, height: 2}
-- shadowOpacity: 0.10
-- shadowRadius: 2
+**Floating Action Buttons**: Use refined drop shadow:
+- shadowOffset: {width: 0, height: 6}
+- shadowOpacity: 0.15
+- shadowRadius: 12
+- elevation: 6
 
 **Card Design**:
-- Corner radius: 16px
+- Corner radius: 14px (slightly tighter for modern feel)
 - Border: None (use subtle shadow instead)
-- Shadow: shadowOffset {width: 0, height: 1}, shadowOpacity: 0.05, shadowRadius: 4
+- Shadow: shadowOffset {width: 0, height: 2}, shadowOpacity: 0.06, shadowRadius: 8
+- elevation: 2
 
-**Spacing System**: 4, 8, 12, 16, 24, 32, 48
+**Border Radius Scale**: 6, 10, 14, 20, 28, 36, 44 (refined for sharper, modern feel)
+
+**Spacing System**: 4, 8, 12, 16, 20, 24, 32, 40, 48
 
 ---
 
