@@ -87,7 +87,6 @@ az postgres flexible-server create \
     --location $LOCATION \
     --admin-user $DB_ADMIN_USER \
     --admin-password "$DB_ADMIN_PASSWORD" \
-    --database-name $DB_NAME \
     --tier Burstable \
     --sku-name Standard_B1ms \
     --storage-size 32 \
@@ -98,11 +97,34 @@ az postgres flexible-server create \
 
 echo -e "${GREEN}✓ PostgreSQL server created${NC}"
 
+# Create the database
+echo -e "${YELLOW}Creating database '$DB_NAME'...${NC}"
+az postgres flexible-server db create \
+    --resource-group $RESOURCE_GROUP \
+    --server-name $DB_SERVER_NAME \
+    --database-name $DB_NAME \
+    --output none
+
+echo -e "${GREEN}✓ Database created${NC}"
+
 # Construct DATABASE_URL
 DATABASE_URL="postgresql://${DB_ADMIN_USER}:${DB_ADMIN_PASSWORD}@${DB_SERVER_NAME}.postgres.database.azure.com:5432/${DB_NAME}?sslmode=require"
 
 # Step 7: Create Container App
 echo -e "\n${YELLOW}Step 7: Deploying Container App...${NC}"
+
+# Check for Twilio credentials (optional but recommended for SMS features)
+if [ -z "$TWILIO_ACCOUNT_SID" ] || [ -z "$TWILIO_AUTH_TOKEN" ]; then
+    echo -e "${YELLOW}⚠️  Twilio credentials not set. SMS features will be disabled.${NC}"
+    echo -e "${YELLOW}   Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_PROXY_SERVICE_SID for full functionality.${NC}"
+    TWILIO_ENVS=""
+else
+    TWILIO_ENVS="TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN"
+    if [ -n "$TWILIO_PROXY_SERVICE_SID" ]; then
+        TWILIO_ENVS="$TWILIO_ENVS TWILIO_PROXY_SERVICE_SID=$TWILIO_PROXY_SERVICE_SID"
+    fi
+fi
+
 az containerapp create \
     --name $CONTAINER_APP_NAME \
     --resource-group $RESOURCE_GROUP \
@@ -117,7 +139,7 @@ az containerapp create \
     --memory 1Gi \
     --min-replicas 0 \
     --max-replicas 3 \
-    --env-vars "DATABASE_URL=$DATABASE_URL" "NODE_ENV=production" "PORT=5000" \
+    --env-vars "DATABASE_URL=$DATABASE_URL" "NODE_ENV=production" "PORT=5000" $TWILIO_ENVS \
     --output none
 
 echo -e "${GREEN}✓ Container App deployed${NC}"

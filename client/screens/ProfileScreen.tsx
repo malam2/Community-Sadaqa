@@ -188,17 +188,27 @@ export default function ProfileScreen() {
         </>
       )}
 
-      <View
+      <Pressable
         style={[
           styles.communityBadge,
           { backgroundColor: theme.primary + "15" },
         ]}
+        onPress={!isGuest ? handleEditLocation : undefined}
+        disabled={isGuest}
       >
         <Feather name="map-pin" size={14} color={theme.primary} />
         <ThemedText style={[styles.communityText, { color: theme.primary }]}>
-          Local Ummah
+          {userLocation ? formatLocation(userLocation) : "Set Your Location"}
         </ThemedText>
-      </View>
+        {!isGuest && (
+          <Feather
+            name="chevron-right"
+            size={14}
+            color={theme.primary}
+            style={{ marginLeft: 4 }}
+          />
+        )}
+      </Pressable>
 
       <View style={styles.menuSection}>
         {!isGuest && (
