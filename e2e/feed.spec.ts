@@ -95,9 +95,9 @@ test.describe("Feed and Filtering", () => {
       .count();
 
     // Trigger refresh by navigating away and back, or pull action
-    await page.getByRole("tab", { name: /profile/i }).click();
+    await page.locator('[aria-label="Profile"]').first().click();
     await page.waitForTimeout(500);
-    await page.getByRole("tab", { name: /feed|home/i }).click();
+    await page.locator('[aria-label="Feed"]').first().click();
 
     // Feed should reload without errors
     await page.waitForTimeout(1000);

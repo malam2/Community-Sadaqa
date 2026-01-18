@@ -16,11 +16,11 @@ test.describe("Post Creation Flow", () => {
       timeout: 10000,
     });
 
-    // Try to create a post
-    await page.getByRole("tab", { name: /create|post|add/i }).click();
+    // Try to create a post - look for the create button by test ID
+    await page.getByTestId("create-post-button").click();
 
     // Should see signup prompt or be redirected
-    await expect(page.getByText(/sign up|create account|login/i)).toBeVisible({
+    await expect(page.getByText(/sign up|create account|login/i).first()).toBeVisible({
       timeout: 10000,
     });
   });
@@ -39,42 +39,40 @@ test.describe("Post Creation Flow", () => {
     });
 
     // Navigate to create post
-    await page.getByRole("tab", { name: /create|post|add/i }).click();
+    await page.getByTestId("create-post-button").click();
+    await page.waitForTimeout(1000); // Wait for screen to fully load
 
-    // Fill out post form
-    await page.getByPlaceholder(/title/i).fill("Need help with groceries");
-    await page
-      .getByPlaceholder(/description|details/i)
-      .fill("Looking for someone to help with weekly grocery shopping.");
+    // Fill out post form using testIDs
+    await page.getByTestId("input-title").fill("Need help with groceries");
+    await page.getByTestId("input-description").fill("Looking for someone to help with weekly grocery shopping.");
 
-    // Select category if dropdown exists
-    const categoryDropdown = page.locator('[data-testid="category-dropdown"]');
-    if (await categoryDropdown.isVisible()) {
+    // Select category - Food option
+    const categoryDropdown = page.getByTestId("category-dropdown");
+    if (await categoryDropdown.isVisible({ timeout: 2000 }).catch(() => false)) {
       await categoryDropdown.click();
-      await page
-        .getByText(/food|groceries/i)
-        .first()
-        .click();
+      await page.waitForTimeout(300); // Wait for dropdown to open
+      const foodOption = page.getByText("Food", { exact: true });
+      if (await foodOption.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await foodOption.click();
+      }
     }
 
-    // Set contact preference to phone
-    const phoneOption = page.getByText(/phone|text|sms/i);
-    if (await phoneOption.isVisible()) {
-      await phoneOption.click();
+    // Accept guidelines checkbox if visible
+    const guidelinesCheckbox = page.getByText(/I confirm|guidelines/i);
+    if (await guidelinesCheckbox.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await guidelinesCheckbox.click();
     }
 
-    // Fill phone number if visible
-    const phoneInput = page.getByPlaceholder(/phone/i);
-    if (await phoneInput.isVisible()) {
-      await phoneInput.fill("5551234567");
-    }
-
-    // Preview and submit
-    const previewButton = page.getByRole("button", {
-      name: /preview|next|continue/i,
-    });
-    if (await previewButton.isVisible()) {
+    // Preview and submit - wait for button to be enabled
+    await page.waitForTimeout(500);
+    const previewButton = page.getByRole("button", { name: /preview|next|continue/i });
+    await expect(previewButton).toBeVisible({ timeout: 5000 });
+    
+    // Check if button is enabled before clicking
+    const isEnabled = await previewButton.isEnabled();
+    if (isEnabled) {
       await previewButton.click();
+      await page.waitForTimeout(500);
       await page.getByRole("button", { name: /post|submit|publish/i }).click();
     }
 
@@ -97,39 +95,47 @@ test.describe("Post Creation Flow", () => {
       timeout: 15000,
     });
 
-    // Navigate to create post
-    await page.getByRole("tab", { name: /create|post|add/i }).click();
-
-    // Switch to offer type
+    // Navigate to create post - look for the create button by test ID
+    await page.getByTestId("create-post-button").click();
+    await page.waitForTimeout(1000); // Wait for screen to fully load
+    
+    // Switch to offer type - look for the segmented control
     const offerTab = page.getByText(/offer/i).first();
-    if (await offerTab.isVisible()) {
+    if (await offerTab.isVisible({ timeout: 2000 }).catch(() => false)) {
       await offerTab.click();
     }
 
-    // Fill out post form
-    await page.getByPlaceholder(/title/i).fill("Offering rides to mosque");
-    await page
-      .getByPlaceholder(/description|details/i)
-      .fill("Can provide rides to Friday prayers.");
+    // Fill out post form using testIDs
+    await page.getByTestId("input-title").fill("Offering rides to mosque");
+    await page.getByTestId("input-description").fill("Can provide rides to Friday prayers.");
 
-    // Set contact preference to email
-    const emailOption = page.getByText(/email/i).first();
-    if (await emailOption.isVisible()) {
-      await emailOption.click();
+    // Select category - Ride option
+    const categoryDropdown = page.getByTestId("category-dropdown");
+    if (await categoryDropdown.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await categoryDropdown.click();
+      await page.waitForTimeout(300);
+      const rideOption = page.getByText("Ride", { exact: true });
+      if (await rideOption.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await rideOption.click();
+      }
     }
 
-    // Fill email if visible
-    const emailInput = page.getByPlaceholder(/email/i).last();
-    if (await emailInput.isVisible()) {
-      await emailInput.fill("helper@example.com");
+    // Accept guidelines checkbox if visible
+    const guidelinesCheckbox = page.getByText(/I confirm|guidelines/i);
+    if (await guidelinesCheckbox.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await guidelinesCheckbox.click();
     }
 
-    // Preview and submit
-    const previewButton = page.getByRole("button", {
-      name: /preview|next|continue/i,
-    });
-    if (await previewButton.isVisible()) {
+    // Preview and submit - wait for button to be enabled
+    await page.waitForTimeout(500);
+    const previewButton = page.getByRole("button", { name: /preview|next|continue/i });
+    await expect(previewButton).toBeVisible({ timeout: 5000 });
+    
+    // Check if button is enabled before clicking
+    const isEnabled = await previewButton.isEnabled();
+    if (isEnabled) {
       await previewButton.click();
+      await page.waitForTimeout(500);
       await page.getByRole("button", { name: /post|submit|publish/i }).click();
     }
 

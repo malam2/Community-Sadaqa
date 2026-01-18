@@ -27,22 +27,34 @@ test.describe("Post Interaction Flow", () => {
 
   test("should view post details", async ({ page }) => {
     // Create a post first
-    await page.getByRole("tab", { name: /create|post|add/i }).click();
-    await page.getByPlaceholder(/title/i).fill(postTitle);
-    await page
-      .getByPlaceholder(/description|details/i)
-      .fill("Test description for viewing");
+    await page.getByTestId("create-post-button").click();
+    await page.waitForTimeout(1000); // Wait for screen to fully load
+    await page.getByTestId("input-title").fill(postTitle);
+    await page.getByTestId("input-description").fill("Test description for viewing");
 
-    const phoneInput = page.getByPlaceholder(/phone/i);
-    if (await phoneInput.isVisible()) {
-      await phoneInput.fill("5551234567");
+    // Select category - Food option
+    const categoryDropdown = page.getByTestId("category-dropdown");
+    if (await categoryDropdown.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await categoryDropdown.click();
+      await page.waitForTimeout(300);
+      const foodOption = page.getByText("Food", { exact: true });
+      if (await foodOption.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await foodOption.click();
+      }
     }
 
-    const previewButton = page.getByRole("button", {
-      name: /preview|next|continue/i,
-    });
-    if (await previewButton.isVisible()) {
+    // Accept guidelines checkbox if visible
+    const guidelinesCheckbox = page.getByText(/I confirm|guidelines/i);
+    if (await guidelinesCheckbox.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await guidelinesCheckbox.click();
+    }
+
+    await page.waitForTimeout(500);
+    const previewButton = page.getByRole("button", { name: /preview|next|continue/i });
+    const isEnabled = await previewButton.isEnabled().catch(() => false);
+    if (isEnabled) {
       await previewButton.click();
+      await page.waitForTimeout(500);
       await page.getByRole("button", { name: /post|submit|publish/i }).click();
     }
 
@@ -51,8 +63,8 @@ test.describe("Post Interaction Flow", () => {
       timeout: 15000,
     });
 
-    // Navigate to feed
-    await page.getByRole("tab", { name: /feed|home/i }).click();
+    // Navigate to feed - use the home icon/feed button
+    await page.locator('[aria-label="Feed"]').first().click();
     await expect(page.getByText(postTitle)).toBeVisible({ timeout: 10000 });
 
     // Click on the post to view details
@@ -69,22 +81,34 @@ test.describe("Post Interaction Flow", () => {
 
   test("should mark post as fulfilled", async ({ page }) => {
     // Create a post first
-    await page.getByRole("tab", { name: /create|post|add/i }).click();
-    await page.getByPlaceholder(/title/i).fill(postTitle);
-    await page
-      .getByPlaceholder(/description|details/i)
-      .fill("Test post to be fulfilled");
+    await page.getByTestId("create-post-button").click();
+    await page.waitForTimeout(1000);
+    await page.getByTestId("input-title").fill(postTitle);
+    await page.getByTestId("input-description").fill("Test post to be fulfilled");
 
-    const phoneInput = page.getByPlaceholder(/phone/i);
-    if (await phoneInput.isVisible()) {
-      await phoneInput.fill("5551234567");
+    // Select category - Food option
+    const categoryDropdown = page.getByTestId("category-dropdown");
+    if (await categoryDropdown.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await categoryDropdown.click();
+      await page.waitForTimeout(300);
+      const foodOption = page.getByText("Food", { exact: true });
+      if (await foodOption.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await foodOption.click();
+      }
     }
 
-    const previewButton = page.getByRole("button", {
-      name: /preview|next|continue/i,
-    });
-    if (await previewButton.isVisible()) {
+    // Accept guidelines checkbox if visible
+    const guidelinesCheckbox = page.getByText(/I confirm|guidelines/i);
+    if (await guidelinesCheckbox.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await guidelinesCheckbox.click();
+    }
+
+    await page.waitForTimeout(500);
+    const previewButton = page.getByRole("button", { name: /preview|next|continue/i });
+    const isEnabled = await previewButton.isEnabled().catch(() => false);
+    if (isEnabled) {
       await previewButton.click();
+      await page.waitForTimeout(500);
       await page.getByRole("button", { name: /post|submit|publish/i }).click();
     }
 
@@ -93,7 +117,7 @@ test.describe("Post Interaction Flow", () => {
     });
 
     // Navigate to feed and find our post
-    await page.getByRole("tab", { name: /feed|home/i }).click();
+    await page.locator('[aria-label="Feed"]').first().click();
     await page.getByText(postTitle).click();
 
     // Mark as fulfilled
@@ -115,22 +139,34 @@ test.describe("Post Interaction Flow", () => {
 
   test("should delete own post", async ({ page }) => {
     // Create a post first
-    await page.getByRole("tab", { name: /create|post|add/i }).click();
-    await page.getByPlaceholder(/title/i).fill(postTitle);
-    await page
-      .getByPlaceholder(/description|details/i)
-      .fill("Test post to be deleted");
+    await page.getByTestId("create-post-button").click();
+    await page.waitForTimeout(1000);
+    await page.getByTestId("input-title").fill(postTitle);
+    await page.getByTestId("input-description").fill("Test post to be deleted");
 
-    const phoneInput = page.getByPlaceholder(/phone/i);
-    if (await phoneInput.isVisible()) {
-      await phoneInput.fill("5551234567");
+    // Select category - Food option
+    const categoryDropdown = page.getByTestId("category-dropdown");
+    if (await categoryDropdown.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await categoryDropdown.click();
+      await page.waitForTimeout(300);
+      const foodOption = page.getByText("Food", { exact: true });
+      if (await foodOption.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await foodOption.click();
+      }
     }
 
-    const previewButton = page.getByRole("button", {
-      name: /preview|next|continue/i,
-    });
-    if (await previewButton.isVisible()) {
+    // Accept guidelines checkbox if visible
+    const guidelinesCheckbox = page.getByText(/I confirm|guidelines/i);
+    if (await guidelinesCheckbox.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await guidelinesCheckbox.click();
+    }
+
+    await page.waitForTimeout(500);
+    const previewButton = page.getByRole("button", { name: /preview|next|continue/i });
+    const isEnabled = await previewButton.isEnabled().catch(() => false);
+    if (isEnabled) {
       await previewButton.click();
+      await page.waitForTimeout(500);
       await page.getByRole("button", { name: /post|submit|publish/i }).click();
     }
 
@@ -139,7 +175,7 @@ test.describe("Post Interaction Flow", () => {
     });
 
     // Navigate to feed and find our post
-    await page.getByRole("tab", { name: /feed|home/i }).click();
+    await page.locator('[aria-label="Feed"]').first().click();
     await page.getByText(postTitle).click();
 
     // Delete post
@@ -157,7 +193,7 @@ test.describe("Post Interaction Flow", () => {
 
     // Should return to feed and post should be gone
     await page.waitForTimeout(1000);
-    await page.getByRole("tab", { name: /feed|home/i }).click();
+    await page.locator('[aria-label="Feed"]').first().click();
     await expect(page.getByText(postTitle)).not.toBeVisible({ timeout: 10000 });
   });
 });

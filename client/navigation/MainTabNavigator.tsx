@@ -59,6 +59,9 @@ function CreateTabButton() {
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       style={styles.createButtonContainer}
+      accessibilityLabel="Create Post"
+      accessibilityRole="button"
+      testID="create-post-button"
     >
       <Animated.View
         style={[
