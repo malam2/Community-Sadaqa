@@ -79,7 +79,7 @@ fi
 az acr build \
     --registry $CONTAINER_REGISTRY \
     --image $IMAGE_NAME:latest \
-    --file Dockerfile \
+    --file deploy/docker/Dockerfile \
     --build-arg EXPO_PUBLIC_DOMAIN="$DOMAIN_FOR_BUILD" \
     .
 echo -e "${GREEN}✓ Image pushed to ACR${NC}"

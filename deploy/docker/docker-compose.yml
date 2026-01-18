@@ -1,3 +1,6 @@
+# Base Docker Compose for local testing
+# Run from project root: docker compose -f deploy/docker/docker-compose.yml up
+
 services:
   # PostgreSQL Database
   db:
@@ -20,7 +23,9 @@ services:
 
   # Express API Server
   server:
-    build: .
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
     container_name: sadaqa-server
     restart: unless-stopped
     ports:

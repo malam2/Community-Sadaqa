@@ -121,11 +121,11 @@ git clone https://github.com/yourusername/Community-Sadaqa.git
 cd Community-Sadaqa
 
 # Configure
-cp .env.production.example .env.production
-nano .env.production  # Add your credentials
+cp deploy/env/.env.production.example deploy/env/.env.production
+nano deploy/env/.env.production  # Add your credentials
 
 # Update Caddyfile with your domain
-nano Caddyfile
+nano deploy/docker/Caddyfile
 
 # Deploy
 ./deploy/deploy-vps.sh
@@ -152,7 +152,7 @@ After deploying, run migrations:
 DATABASE_URL="your_production_url" npm run db:push
 
 # With Docker Compose
-docker compose -f docker-compose.prod.yml exec server npm run db:push
+docker compose -f deploy/docker/docker-compose.prod.yml exec server npm run db:push
 ```
 
 ---

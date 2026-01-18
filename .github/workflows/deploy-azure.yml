@@ -1,20 +1,15 @@
 name: Deploy to Azure Container Apps
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
   workflow_dispatch:
     inputs:
       environment:
         description: 'Deployment environment'
         required: true
-        default: 'staging'
         type: choice
         options:
-          - staging
-          - production
+          - dev
+          - PROD
 
 env:
   AZURE_CONTAINER_REGISTRY: sadaqaregistry
@@ -22,125 +17,54 @@ env:
   IMAGE_NAME: sadaqa-server
 
 jobs:
-  # Build job - runs on all pushes and PRs
-  build:
+  deploy:
     runs-on: ubuntu-latest
-    outputs:
-      image_tag: ${{ steps.meta.outputs.tags }}
+    environment:
+      name: ${{ github.event.inputs.environment }}
+      url: https://${{ steps.deploy.outputs.url }}
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Type check
-        run: npm run check:types
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Build server
-        run: npm run server:build
-
       - name: Login to Azure
-        if: github.event_name != 'pull_request'
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Login to Azure Container Registry
-        if: github.event_name != 'pull_request'
-        run: |
-          az acr login --name ${{ env.AZURE_CONTAINER_REGISTRY }}
-
-      - name: Generate image metadata
-        id: meta
-        run: |
-          echo "tags=${{ github.sha }}" >> $GITHUB_OUTPUT
-
       - name: Build and push image to ACR
-        if: github.event_name != 'pull_request'
         run: |
           az acr build \
             --registry ${{ env.AZURE_CONTAINER_REGISTRY }} \
             --image ${{ env.IMAGE_NAME }}:${{ github.sha }} \
-            --image ${{ env.IMAGE_NAME }}:latest \
-            --file Dockerfile \
+            --image ${{ env.IMAGE_NAME }}:${{ github.event.inputs.environment }} \
+            --file deploy/docker/Dockerfile \
             .
 
-  # Deploy to staging (automatic on push to main)
-  deploy-staging:
-    needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    environment:
-      name: staging
-      url: https://${{ steps.deploy.outputs.url }}
-    
-    steps:
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Deploy to Staging
+      - name: Deploy to Container App
         id: deploy
         run: |
+          APP_NAME=${{ github.event.inputs.environment == 'PROD' && 'sadaqa-api' || 'sadaqa-api-dev' }}
+          NODE_ENV=${{ github.event.inputs.environment == 'PROD' && 'production' || 'development' }}
+          
           az containerapp update \
-            --name sadaqa-api-staging \
+            --name $APP_NAME \
             --resource-group ${{ env.RESOURCE_GROUP }} \
             --image ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }} \
-            --set-env-vars "NODE_ENV=staging"
+            --set-env-vars "NODE_ENV=$NODE_ENV" "DATABASE_URL=${{ secrets.DATABASE_URL }}"
           
           URL=$(az containerapp show \
-            --name sadaqa-api-staging \
+            --name $APP_NAME \
             --resource-group ${{ env.RESOURCE_GROUP }} \
             --query properties.configuration.ingress.fqdn -o tsv)
           echo "url=$URL" >> $GITHUB_OUTPUT
-          echo "🚀 Staging deployed to: https://$URL"
-
-  # Deploy to production (requires manual approval)
-  deploy-production:
-    needs: [build, deploy-staging]
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production'
-    runs-on: ubuntu-latest
-    environment:
-      name: production
-      url: https://${{ steps.deploy.outputs.url }}
-    
-    steps:
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Deploy to Production
-        id: deploy
-        run: |
-          az containerapp update \
-            --name sadaqa-api \
-            --resource-group ${{ env.RESOURCE_GROUP }} \
-            --image ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }} \
-            --set-env-vars "NODE_ENV=production"
-          
-          URL=$(az containerapp show \
-            --name sadaqa-api \
-            --resource-group ${{ env.RESOURCE_GROUP }} \
-            --query properties.configuration.ingress.fqdn -o tsv)
-          echo "url=$URL" >> $GITHUB_OUTPUT
-          echo "🚀 Production deployed to: https://$URL"
 
       - name: Create deployment summary
         run: |
-          echo "## 🚀 Production Deployment" >> $GITHUB_STEP_SUMMARY
+          EMOJI=${{ github.event.inputs.environment == 'PROD' && '🚀' || '🧪' }}
+          ENV_LABEL=${{ github.event.inputs.environment == 'PROD' && 'Production' || 'Development' }}
+          echo "## $EMOJI $ENV_LABEL Deployment" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ github.event.inputs.environment }}" >> $GITHUB_STEP_SUMMARY
           echo "**Image:** \`${{ env.IMAGE_NAME }}:${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
           echo "**URL:** https://${{ steps.deploy.outputs.url }}" >> $GITHUB_STEP_SUMMARY
           echo "**Deployed by:** @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY

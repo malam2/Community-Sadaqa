@@ -1,5 +1,6 @@
 # Production Docker Compose with Caddy reverse proxy for HTTPS
 # Use this for self-hosted deployments (VPS, Azure VM, etc.)
+# Run from project root: docker compose -f deploy/docker/docker-compose.prod.yml up -d
 
 services:
   # Caddy - Automatic HTTPS reverse proxy
@@ -41,8 +42,8 @@ services:
   # Express API Server
   server:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
     container_name: sadaqa-server
     restart: unless-stopped
     environment:

@@ -30,7 +30,10 @@ web-build
 Thumbs.db
 
 # Test files
-*.test.ts
-*.spec.ts
-__tests__
-coverage
+e2e/
+test-results/
+playwright-report/
+playwright.config.ts
+
+# Deploy scripts
+deploy/

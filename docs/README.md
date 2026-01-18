@@ -20,7 +20,7 @@ A mosque-centered mutual aid (sadaqa/charity) platform that connects community m
 - **Client**: Expo React Native with TanStack Query
 - **Server**: Express.js with Drizzle ORM
 - **Database**: PostgreSQL
-- **CI/CD**: GitHub Actions with DEV/PRD environments
+- **CI/CD**: GitHub Actions with staging/production environments
 
 ## Quick Start (Development)
 
@@ -90,13 +90,13 @@ Build and run the full stack with Docker:
 
 ```bash
 # Production build with app + database
-docker compose -f deploy/docker/docker-compose.prod.yml up --build -d
+docker compose up --build -d
 
 # Check logs
-docker compose -f deploy/docker/docker-compose.prod.yml logs -f
+docker compose logs -f
 
 # Stop
-docker compose -f deploy/docker/docker-compose.prod.yml down
+docker compose down
 ```
 
 The app will be available at http://localhost:5000
@@ -116,28 +116,18 @@ For Expo web, you can:
 ## Project Structure
 
 ```
-├── client/                 # Expo React Native app
-│   ├── screens/            # App screens
-│   ├── components/         # Reusable components (organized by category)
-│   │   ├── ui/             # Badge, Button, FilterChip
-│   │   ├── form/           # FormInput, Dropdown, Toggle
-│   │   ├── primitives/     # ThemedText, ThemedView, Spacer
-│   │   ├── feedback/       # Toast, Skeleton, ErrorBoundary
-│   │   ├── posts/          # PostCard
-│   │   ├── layout/         # KeyboardAwareScrollViewCompat
-│   │   └── widgets/        # CommunityWidgets, IslamicQuote
-│   ├── contexts/           # React Context (Auth)
-│   └── lib/                # API & utilities
-├── server/                 # Express.js API
-│   ├── routes.ts           # API endpoints
-│   └── db.ts               # Drizzle ORM config
-├── shared/                 # Shared schema
-│   └── schema.ts           # Drizzle + Zod schemas
-├── deploy/                 # Deployment configs
-│   ├── docker/             # Dockerfile, docker-compose files
-│   ├── env/                # .env examples
-│   └── *.sh                # Deployment scripts
-└── e2e/                    # Playwright E2E tests
+├── client/           # Expo React Native app
+│   ├── screens/      # App screens
+│   ├── components/   # Reusable components
+│   ├── contexts/     # React Context (Auth)
+│   └── lib/          # API & utilities
+├── server/           # Express.js API
+│   ├── routes.ts     # API endpoints
+│   └── db.ts         # Drizzle ORM config
+├── shared/           # Shared schema
+│   └── schema.ts     # Drizzle + Zod schemas
+├── docker-compose.yml       # Production: app + db
+└── docker-compose.dev.yml   # Dev: db only
 ```
 
 ## NPM Scripts
@@ -185,9 +175,8 @@ npm run test:report
 Tests run automatically on every push and PR via GitHub Actions. See `.github/workflows/e2e.yml`.
 
 **Deployment workflow** (`deploy-azure.yml`):
-- Automatic deployment to DEV on push to `develop`
-- Automatic deployment to PRD on push to `main`
-- DATABASE_URL injected from GitHub secrets
+- Automatic deployment to staging on push to `main`
+- Manual approval required for production
 - See [docs/CI-CD.md](docs/CI-CD.md) for full documentation
 
 ### Managing Secrets
