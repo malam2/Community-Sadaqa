@@ -351,12 +351,12 @@ export default function AboutScreen({ onClose }: AboutScreenProps) {
                 Created with ❤️ by
               </ThemedText>
               <ThemedText style={[styles.creatorName, { color: theme.text }]}>
-                Mohammed Tuhin
+                Khairul Alam
               </ThemedText>
               <ThemedText
                 style={[styles.creatorLocation, { color: theme.textSecondary }]}
               >
-                Bay Area, CA
+                Diamond Bar, CA
               </ThemedText>
               <ThemedText
                 style={[styles.creatorLabel, { color: theme.textTertiary, marginTop: 8 }]}
