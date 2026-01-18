@@ -114,6 +114,7 @@ export default function MainTabNavigator() {
         component={FeedStackNavigator}
         options={{
           tabBarLabel: () => null,
+          tabBarAccessibilityLabel: "Feed",
           tabBarIcon: ({ focused, size }) => (
             <Feather
               name="home"
@@ -128,6 +129,7 @@ export default function MainTabNavigator() {
         component={CreateTabPlaceholder}
         options={{
           title: "",
+          tabBarAccessibilityLabel: "Create Post",
           tabBarButton: () => <CreateTabButton />,
         }}
         listeners={{
@@ -141,6 +143,7 @@ export default function MainTabNavigator() {
         component={ProfileStackNavigator}
         options={{
           tabBarLabel: () => null,
+          tabBarAccessibilityLabel: "Profile",
           tabBarIcon: ({ focused, size }) => (
             <Feather
               name="user"

@@ -6,6 +6,7 @@ import {
   Alert,
   Pressable,
   Linking,
+  ActivityIndicator,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
@@ -19,13 +20,16 @@ import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUpdatePostMutation, useDeletePostMutation } from "@/hooks/queries";
 import { getErrorMessage } from "@/lib/errorUtils";
+import { startConversation } from "@/lib/api";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import {
   Post,
   getCategoryLabel,
   getTimeAgo,
   getContactPreferenceLabel,
+  getExchangeTypeLabel,
 } from "@/types/post";
+import { formatLocation, formatDistance } from "@/types/location";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 type PostDetailRouteProp = RouteProp<RootStackParamList, "PostDetail">;
@@ -41,6 +45,7 @@ export default function PostDetailScreen() {
 
   const { post } = route.params;
   const [currentPost, setCurrentPost] = React.useState<Post>(post);
+  const [isStartingConversation, setIsStartingConversation] = React.useState(false);
   const isOwner = user?.id === post.authorId;
   const isGuest = user?.isGuest ?? false;
 
@@ -48,6 +53,44 @@ export default function PostDetailScreen() {
   const updateMutation = useUpdatePostMutation();
   const deleteMutation = useDeletePostMutation();
 
+  // Start a privacy-preserving conversation
+  const handleStartConversation = async () => {
+    if (!user) return;
+
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    if (isGuest) {
+      Alert.alert(
+        "Sign Up Required",
+        "Please create an account to message the poster.",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Sign Up",
+            onPress: () => navigation.navigate("Auth" as any),
+          },
+        ],
+      );
+      return;
+    }
+
+    try {
+      setIsStartingConversation(true);
+      const conversation = await startConversation(user.id, currentPost.id);
+      
+      // Navigate to conversation screen
+      navigation.navigate("Conversation" as any, {
+        conversationId: conversation.id,
+        postTitle: currentPost.title,
+      });
+    } catch (error) {
+      toast.error("Error", getErrorMessage(error) || "Failed to start conversation.");
+    } finally {
+      setIsStartingConversation(false);
+    }
+  };
+
+  // Legacy direct contact (fallback)
   const handleContact = async (method: "phone" | "email" | "sms") => {
     const { contactPhone, contactEmail, title } = currentPost;
 
@@ -106,23 +149,22 @@ export default function PostDetailScreen() {
     const hasPhone = !!contactPhone;
     const hasEmail = !!contactEmail;
 
-    // Build contact options based on what's available
+    // Build contact options - prioritize in-app messaging
     const options: {
       text: string;
       onPress?: () => void;
       style?: "cancel" | "default" | "destructive";
     }[] = [];
 
-    if (contactPreference === "in_app") {
-      Alert.alert(
-        "Contact Preference",
-        "This poster prefers to be contacted through the app. In-app messaging is coming soon!",
-        [{ text: "OK" }],
-      );
-      return;
-    }
+    // Always offer in-app messaging first (privacy-preserving)
+    options.push({
+      text: "💬 Send In-App Message",
+      onPress: handleStartConversation,
+    });
 
+    // Only show direct contact as fallback if they explicitly prefer it
     if (
+      contactPreference !== "in_app" &&
       hasPhone &&
       (contactPreference === "phone" || contactPreference === "any")
     ) {
@@ -137,6 +179,7 @@ export default function PostDetailScreen() {
     }
 
     if (
+      contactPreference !== "in_app" &&
       hasEmail &&
       (contactPreference === "email" || contactPreference === "any")
     ) {
@@ -148,18 +191,9 @@ export default function PostDetailScreen() {
 
     options.push({ text: "Cancel", style: "cancel" });
 
-    if (options.length === 1) {
-      Alert.alert(
-        "No Contact Info",
-        "The poster hasn't provided contact information yet.",
-        [{ text: "OK" }],
-      );
-      return;
-    }
-
     Alert.alert(
       currentPost.type === "request" ? "Offer Help" : "Accept Offer",
-      "How would you like to reach out?",
+      "In-app messaging protects your privacy. How would you like to reach out?",
       options,
     );
   };
@@ -348,8 +382,95 @@ export default function PostDetailScreen() {
           </View>
         </View>
 
+        {/* Location Section */}
+        {(currentPost.city || currentPost.state || currentPost.zipCode) && (
+          <View style={styles.infoSection}>
+            <ThemedText
+              type="small"
+              style={[styles.contactLabel, { color: theme.textSecondary }]}
+            >
+              Location
+            </ThemedText>
+            <View
+              style={[
+                styles.contactBadge,
+                { backgroundColor: theme.backgroundSecondary },
+              ]}
+            >
+              <Feather name="map-pin" size={16} color={theme.primary} />
+              <ThemedText style={styles.infoText}>
+                {formatLocation({
+                  city: currentPost.city,
+                  state: currentPost.state,
+                  zipCode: currentPost.zipCode,
+                })}
+                {currentPost.distance !== undefined && (
+                  <ThemedText style={{ color: theme.textSecondary }}>
+                    {" "}• {formatDistance(currentPost.distance)} away
+                  </ThemedText>
+                )}
+              </ThemedText>
+            </View>
+          </View>
+        )}
+
+        {/* Exchange Type Section */}
+        {currentPost.exchangeType && (
+          <View style={styles.infoSection}>
+            <ThemedText
+              type="small"
+              style={[styles.contactLabel, { color: theme.textSecondary }]}
+            >
+              Type of Help
+            </ThemedText>
+            <View
+              style={[
+                styles.contactBadge,
+                {
+                  backgroundColor:
+                    currentPost.exchangeType === "money"
+                      ? theme.accent + "20"
+                      : theme.backgroundSecondary,
+                },
+              ]}
+            >
+              <Feather
+                name={
+                  currentPost.exchangeType === "goods"
+                    ? "package"
+                    : currentPost.exchangeType === "service"
+                      ? "heart"
+                      : currentPost.exchangeType === "money"
+                        ? "dollar-sign"
+                        : "gift"
+                }
+                size={16}
+                color={
+                  currentPost.exchangeType === "money" ? "#B8860B" : theme.primary
+                }
+              />
+              <ThemedText
+                style={[
+                  styles.infoText,
+                  currentPost.exchangeType === "money" && { color: "#B8860B" },
+                ]}
+              >
+                {getExchangeTypeLabel(currentPost.exchangeType)}
+              </ThemedText>
+            </View>
+            {currentPost.exchangeNotes && (
+              <ThemedText
+                type="small"
+                style={[styles.exchangeNotes, { color: theme.textSecondary }]}
+              >
+                {currentPost.exchangeNotes}
+              </ThemedText>
+            )}
+          </View>
+        )}
+
         {!isOwner && currentPost.status === "open" ? (
-          <Pressable style={[styles.reportButton]} onPress={handleReport}>
+          <Pressable style={[styles.reportButton]} onPress={handleReport} accessibilityRole="button">
             <Feather name="flag" size={16} color={theme.textTertiary} />
             <ThemedText
               style={[styles.reportText, { color: theme.textTertiary }]}
@@ -380,6 +501,8 @@ export default function PostDetailScreen() {
               </Button>
               <Pressable
                 onPress={handleDeletePost}
+                accessibilityRole="button"
+                accessibilityLabel="Delete"
                 style={[styles.deleteButton, { borderColor: theme.urgent }]}
               >
                 <Feather name="trash-2" size={18} color={theme.urgent} />
@@ -403,6 +526,7 @@ export default function PostDetailScreen() {
         >
           <Pressable
             onPress={handleDeletePost}
+            accessibilityRole="button"
             style={[styles.deleteTextButton]}
           >
             <Feather name="trash-2" size={16} color={theme.urgent} />
@@ -496,6 +620,17 @@ const styles = StyleSheet.create({
   contactText: {
     marginLeft: Spacing.sm,
     fontWeight: "500",
+  },
+  infoSection: {
+    marginBottom: Spacing["2xl"],
+  },
+  infoText: {
+    marginLeft: Spacing.sm,
+  },
+  exchangeNotes: {
+    marginTop: Spacing.sm,
+    lineHeight: 18,
+    fontStyle: "italic",
   },
   reportButton: {
     flexDirection: "row",

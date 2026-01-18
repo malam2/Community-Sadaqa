@@ -12,10 +12,12 @@ import ReportScreen from "@/screens/ReportScreen";
 import GuidelinesScreen from "@/screens/GuidelinesScreen";
 import PrivacyScreen from "@/screens/PrivacyScreen";
 import AboutScreen from "@/screens/AboutScreen";
+import ConversationScreen from "@/screens/ConversationScreen";
+import ConversationsListScreen from "@/screens/ConversationsListScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/hooks/useTheme";
-import { Post, PostType, PostCategory, ContactPreference } from "@/types/post";
+import { Post, PostType, PostCategory, ContactPreference, ExchangeType } from "@/types/post";
 
 export type RootStackParamList = {
   Auth: undefined;
@@ -32,6 +34,15 @@ export type RootStackParamList = {
       contactPreference: ContactPreference;
       contactPhone?: string;
       contactEmail?: string;
+      // Location fields
+      city?: string;
+      state?: string;
+      zipCode?: string;
+      latitude?: number;
+      longitude?: number;
+      // Exchange type
+      exchangeType?: ExchangeType;
+      exchangeNotes?: string;
     };
   };
   Success: {
@@ -46,6 +57,11 @@ export type RootStackParamList = {
   Guidelines: undefined;
   Privacy: undefined;
   About: undefined;
+  Conversation: {
+    conversationId: string;
+    postTitle: string;
+  };
+  Conversations: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -138,6 +154,21 @@ export default function RootStackNavigator() {
             options={{
               headerTitle: "About One Ummah",
               presentation: "modal",
+            }}
+          />
+          <Stack.Screen
+            name="Conversation"
+            component={ConversationScreen}
+            options={{
+              headerTitle: "Messages",
+              presentation: "modal",
+            }}
+          />
+          <Stack.Screen
+            name="Conversations"
+            component={ConversationsListScreen}
+            options={{
+              headerTitle: "My Conversations",
             }}
           />
         </>

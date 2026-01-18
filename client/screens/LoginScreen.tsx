@@ -175,6 +175,7 @@ export default function LoginScreen() {
           <Pressable
             onPress={handleContinueAsGuest}
             disabled={isGuestLoading}
+            accessibilityRole="button"
             style={[styles.guestButton, { borderColor: theme.primary }]}
           >
             {isGuestLoading ? (

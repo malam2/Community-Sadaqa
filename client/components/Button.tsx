@@ -7,7 +7,7 @@ import Animated, {
   WithSpringConfig,
 } from "react-native-reanimated";
 
-import { ThemedText } from "@/components/primitives/ThemedText";
+import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { BorderRadius, Spacing } from "@/constants/theme";
 
@@ -73,7 +73,6 @@ export function Button({
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       disabled={disabled}
-      accessibilityRole="button"
       style={[
         styles.button,
         {

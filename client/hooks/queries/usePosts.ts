@@ -7,30 +7,48 @@ import {
   updatePost,
   deletePost,
   CreatePostData,
+  FetchPostsOptions,
 } from "@/lib/api";
 
 // Query Keys
 export const postKeys = {
   all: ["posts"] as const,
   lists: () => [...postKeys.all, "list"] as const,
-  list: (filters?: { type?: string; category?: string; search?: string }) =>
-    [...postKeys.lists(), filters] as const,
+  list: (filters?: {
+    type?: string;
+    category?: string;
+    search?: string;
+    lat?: number;
+    lng?: number;
+    radius?: number;
+  }) => [...postKeys.lists(), filters] as const,
   userPosts: (userId: string) => [...postKeys.all, "user", userId] as const,
   detail: (id: string) => [...postKeys.all, "detail", id] as const,
 };
 
 /**
- * Fetch all posts with optional client-side filtering
+ * Fetch all posts with optional client-side and server-side filtering
  */
 export function usePostsQuery(filters?: {
   type?: "request" | "offer" | "all";
   category?: string;
   urgent?: boolean;
   search?: string;
+  // Location-based filtering (server-side)
+  lat?: number;
+  lng?: number;
+  radius?: number;
 }) {
+  // Build fetch options for location-based filtering (done server-side)
+  const fetchOptions: FetchPostsOptions = {
+    lat: filters?.lat,
+    lng: filters?.lng,
+    radius: filters?.radius,
+  };
+
   return useQuery({
     queryKey: postKeys.list(filters),
-    queryFn: fetchPosts,
+    queryFn: () => fetchPosts(fetchOptions),
     select: (posts) => {
       let filtered = posts;
 

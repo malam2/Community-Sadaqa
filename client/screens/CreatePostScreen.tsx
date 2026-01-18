@@ -17,6 +17,8 @@ import {
   ThemedText,
   EmptyState,
   IslamicQuote,
+  LocationPicker,
+  ExchangeTypePicker,
 } from "@/components";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
@@ -25,9 +27,11 @@ import {
   PostType,
   PostCategory,
   ContactPreference,
+  ExchangeType,
   CATEGORIES,
   CONTACT_PREFERENCES,
 } from "@/types/post";
+import { UserLocation } from "@/types/location";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 const POST_TYPES: { value: PostType; label: string }[] = [
@@ -41,7 +45,7 @@ export default function CreatePostScreen() {
   const { theme } = useTheme();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { isGuest, logout } = useAuth();
+  const { isGuest, logout, user } = useAuth();
 
   const [type, setType] = React.useState<PostType>("request");
   const [category, setCategory] = React.useState<PostCategory | null>(null);
@@ -50,10 +54,21 @@ export default function CreatePostScreen() {
   const [isUrgent, setIsUrgent] = React.useState(false);
   const [isAnonymous, setIsAnonymous] = React.useState(false);
   const [contactPreference, setContactPreference] =
-    React.useState<ContactPreference | null>(null);
+    React.useState<ContactPreference | null>("in_app");
   const [contactPhone, setContactPhone] = React.useState("");
   const [contactEmail, setContactEmail] = React.useState("");
   const [disclaimerAccepted, setDisclaimerAccepted] = React.useState(false);
+  
+  // New: Location and exchange type
+  const [location, setLocation] = React.useState<UserLocation>({
+    city: user?.city,
+    state: user?.state,
+    zipCode: user?.zipCode,
+    latitude: user?.latitude,
+    longitude: user?.longitude,
+  });
+  const [exchangeType, setExchangeType] = React.useState<ExchangeType | null>("goods");
+  const [exchangeNotes, setExchangeNotes] = React.useState("");
 
   const needsPhone =
     contactPreference === "phone" || contactPreference === "any";
@@ -65,6 +80,7 @@ export default function CreatePostScreen() {
     title.trim().length > 0 &&
     description.trim().length > 0 &&
     contactPreference !== null &&
+    exchangeType !== null &&
     disclaimerAccepted &&
     (!needsPhone || contactPhone.trim().length >= 10) &&
     (!needsEmail || contactEmail.trim().includes("@"));
@@ -87,6 +103,15 @@ export default function CreatePostScreen() {
         contactPreference: contactPreference!,
         contactPhone: contactPhone.trim() || undefined,
         contactEmail: contactEmail.trim() || undefined,
+        // Location fields
+        city: location.city,
+        state: location.state,
+        zipCode: location.zipCode,
+        latitude: location.latitude,
+        longitude: location.longitude,
+        // Exchange type
+        exchangeType: exchangeType!,
+        exchangeNotes: exchangeNotes.trim() || undefined,
       },
     });
   };
@@ -210,6 +235,38 @@ export default function CreatePostScreen() {
           )}
         </View>
 
+        {/* Location Section */}
+        <View style={styles.section}>
+          <ThemedText type="h3" style={styles.sectionTitle}>
+            Location
+          </ThemedText>
+          <ThemedText
+            type="small"
+            style={[styles.sectionDescription, { color: theme.textSecondary }]}
+          >
+            Help connect with people near you
+          </ThemedText>
+          <LocationPicker
+            value={location}
+            onChange={setLocation}
+            label="Post Location"
+          />
+        </View>
+
+        {/* Exchange Type Section */}
+        <View style={styles.section}>
+          <ThemedText type="h3" style={styles.sectionTitle}>
+            Type of Help
+          </ThemedText>
+          <ExchangeTypePicker
+            value={exchangeType}
+            onChange={setExchangeType}
+            exchangeNotes={exchangeNotes}
+            onNotesChange={setExchangeNotes}
+            postType={type}
+          />
+        </View>
+
         <View style={styles.section}>
           <Toggle
             label="Mark as Urgent"
@@ -281,6 +338,13 @@ const styles = StyleSheet.create({
   },
   section: {
     marginTop: Spacing["2xl"],
+  },
+  sectionTitle: {
+    marginBottom: Spacing.xs,
+  },
+  sectionDescription: {
+    marginBottom: Spacing.md,
+    lineHeight: 18,
   },
   warning: {
     flexDirection: "row",

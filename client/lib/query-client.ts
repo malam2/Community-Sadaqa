@@ -7,6 +7,11 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 export function getApiUrl(): string {
   let host = process.env.EXPO_PUBLIC_DOMAIN;
 
+  // Fallback for web: use window.location.host (works when served from same origin)
+  if (!host && typeof window !== "undefined" && window.location) {
+    host = window.location.host;
+  }
+
   if (!host) {
     throw new Error("EXPO_PUBLIC_DOMAIN is not set");
   }
@@ -71,9 +76,10 @@ export const queryClient = new QueryClient({
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
-      refetchOnWindowFocus: false,
-      staleTime: Infinity,
-      retry: false,
+      refetchOnWindowFocus: true, // Refetch when app comes to foreground
+      refetchOnReconnect: true, // Refetch when network reconnects
+      staleTime: 1000 * 60 * 2, // 2 minutes - data is fresh for this long
+      retry: 1, // Retry once on failure
     },
     mutations: {
       retry: false,

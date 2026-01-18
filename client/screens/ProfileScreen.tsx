@@ -27,15 +27,17 @@ import {
   SkeletonFeed,
   SkeletonProfileHeader,
   toast,
+  LocationPicker,
 } from "@/components";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserPostsQuery } from "@/hooks/queries";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { Post } from "@/types/post";
-import { updateDisplayName } from "@/lib/auth";
+import { updateDisplayName, updateUserLocation } from "@/lib/auth";
 import { getErrorMessage } from "@/lib/errorUtils";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
+import { Location, formatLocation } from "@/types/location";
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
@@ -55,10 +57,61 @@ export default function ProfileScreen() {
   const [newDisplayName, setNewDisplayName] = React.useState("");
   const [isSavingName, setIsSavingName] = React.useState(false);
 
+  // Location editing state
+  const [showLocationModal, setShowLocationModal] = React.useState(false);
+  const [newLocation, setNewLocation] = React.useState<Location | null>(null);
+  const [isSavingLocation, setIsSavingLocation] = React.useState(false);
+
+  // Get current user location for display
+  const userLocation: Location | null = user?.city
+    ? {
+        city: user.city,
+        state: user.state,
+        zipCode: user.zipCode,
+        latitude: user.latitude,
+        longitude: user.longitude,
+        radius: user.locationRadius,
+      }
+    : null;
+
   const handleEditName = () => {
     if (!user || isGuest) return;
     setNewDisplayName(user.displayName);
     setShowNameModal(true);
+  };
+
+  const handleEditLocation = () => {
+    if (!user || isGuest) return;
+    setNewLocation(userLocation);
+    setShowLocationModal(true);
+  };
+
+  const handleSaveLocation = async () => {
+    if (!user) return;
+
+    setIsSavingLocation(true);
+    try {
+      const locationData = newLocation
+        ? {
+            city: newLocation.city,
+            state: newLocation.state,
+            zipCode: newLocation.zipCode,
+            latitude: newLocation.latitude,
+            longitude: newLocation.longitude,
+            locationRadius: newLocation.radius,
+          }
+        : {};
+
+      const updated = await updateUserLocation(user.id, locationData);
+      setUser(updated);
+      setShowLocationModal(false);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      toast.success("Location updated", "Your location settings have been saved.");
+    } catch (error) {
+      toast.error("Error", getErrorMessage(error) || "Failed to update location.");
+    } finally {
+      setIsSavingLocation(false);
+    }
   };
 
   const handleSaveName = async () => {
@@ -151,6 +204,22 @@ export default function ProfileScreen() {
       </View>
 
       <View style={styles.menuSection}>
+        {!isGuest && (
+          <>
+            <MenuItem
+              icon="message-circle"
+              label="My Conversations"
+              onPress={() => navigation.navigate("Conversations")}
+              theme={theme}
+            />
+            <MenuItem
+              icon="map-pin"
+              label={userLocation ? `Location: ${formatLocation(userLocation)}` : "Set Your Location"}
+              onPress={handleEditLocation}
+              theme={theme}
+            />
+          </>
+        )}
         <MenuItem
           icon="book-open"
           label="Community Guidelines"
@@ -307,6 +376,66 @@ export default function ProfileScreen() {
           </Pressable>
         </Pressable>
       </Modal>
+
+      {/* Edit Location Modal */}
+      <Modal
+        visible={showLocationModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowLocationModal(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setShowLocationModal(false)}
+        >
+          <Pressable
+            style={[
+              styles.modalContent,
+              styles.locationModalContent,
+              { backgroundColor: theme.backgroundSecondary },
+            ]}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <ThemedText type="h3" style={styles.modalTitle}>
+              Update Your Location
+            </ThemedText>
+            <ThemedText
+              type="small"
+              style={[styles.modalSubtitle, { color: theme.textSecondary }]}
+            >
+              Your location helps show you nearby community posts
+            </ThemedText>
+            
+            <LocationPicker
+              value={newLocation}
+              onChange={setNewLocation}
+              showRadius
+            />
+
+            <View style={styles.modalButtons}>
+              <Pressable
+                style={[styles.modalButton, styles.modalCancelButton]}
+                onPress={() => setShowLocationModal(false)}
+              >
+                <ThemedText style={{ color: theme.textSecondary }}>
+                  Cancel
+                </ThemedText>
+              </Pressable>
+              <Button
+                onPress={handleSaveLocation}
+                disabled={isSavingLocation}
+                style={styles.modalSaveButton}
+              >
+                {isSavingLocation ? (
+                  <ActivityIndicator color="#FFF" size="small" />
+                ) : (
+                  "Save"
+                )}
+              </Button>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -324,6 +453,7 @@ function MenuItem({ icon, label, onPress, theme, danger }: MenuItemProps) {
     <Pressable
       style={[styles.menuItem, { backgroundColor: theme.backgroundSecondary }]}
       onPress={onPress}
+      accessibilityRole="button"
     >
       <View
         style={[
@@ -440,6 +570,9 @@ const styles = StyleSheet.create({
     maxWidth: 400,
     borderRadius: BorderRadius.lg,
     padding: Spacing.xl,
+  },
+  locationModalContent: {
+    maxHeight: "80%",
   },
   modalTitle: {
     marginBottom: Spacing.xs,

@@ -13,6 +13,8 @@ export { FormInput } from "./form/FormInput";
 export { Dropdown } from "./form/Dropdown";
 export { Toggle } from "./form/Toggle";
 export { SegmentedControl } from "./form/SegmentedControl";
+export { LocationPicker } from "./form/LocationPicker";
+export { ExchangeTypePicker } from "./form/ExchangeTypePicker";
 
 // Primitives
 export { ThemedText } from "./primitives/ThemedText";

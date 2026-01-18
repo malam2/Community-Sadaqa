@@ -9,6 +9,13 @@ export interface AuthUser {
   displayName: string;
   communityId: string;
   isGuest?: boolean;
+  // Location fields
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  latitude?: number;
+  longitude?: number;
+  locationRadius?: number;
 }
 
 export function createGuestUser(): AuthUser {
@@ -41,17 +48,27 @@ export async function clearUser(): Promise<void> {
   await AsyncStorage.removeItem(AUTH_KEY);
 }
 
+export interface SignupLocationData {
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  latitude?: number;
+  longitude?: number;
+  locationRadius?: number;
+}
+
 export async function signup(
   email: string,
   password: string,
   displayName: string,
+  location?: SignupLocationData,
 ): Promise<AuthUser> {
   const response = await fetch(
     new URL("/api/auth/signup", getApiUrl()).toString(),
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password, displayName }),
+      body: JSON.stringify({ email, password, displayName, ...location }),
     },
   );
 
@@ -109,6 +126,29 @@ export async function updateDisplayName(
 
   if (!response.ok) {
     throw new Error(data.error || "Failed to update name");
+  }
+
+  await storeUser(data);
+  return data;
+}
+
+export async function updateUserLocation(
+  userId: string,
+  location: SignupLocationData,
+): Promise<AuthUser> {
+  const response = await fetch(
+    new URL(`/api/users/${userId}/location`, getApiUrl()).toString(),
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(location),
+    },
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "Failed to update location");
   }
 
   await storeUser(data);

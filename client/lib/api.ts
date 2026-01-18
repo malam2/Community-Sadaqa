@@ -1,5 +1,7 @@
 import { getApiUrl } from "@/lib/query-client";
-import { Post, PostType, PostCategory, ContactPreference } from "@/types/post";
+import { Post, PostType, PostCategory, ContactPreference, ExchangeType } from "@/types/post";
+import { Conversation, Message, MeetingInfo, MeetingDetails } from "@/types/conversation";
+import { UserLocation } from "@/types/location";
 
 export interface CreatePostData {
   type: PostType;
@@ -11,10 +13,37 @@ export interface CreatePostData {
   contactPreference: ContactPreference;
   contactPhone?: string;
   contactEmail?: string;
+  // Location fields
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  latitude?: number;
+  longitude?: number;
+  // Exchange type
+  exchangeType?: ExchangeType;
+  exchangeNotes?: string;
 }
 
-export async function fetchPosts(): Promise<Post[]> {
-  const response = await fetch(new URL("/api/posts", getApiUrl()).toString());
+export interface FetchPostsOptions {
+  lat?: number;
+  lng?: number;
+  radius?: number;
+}
+
+export async function fetchPosts(options?: FetchPostsOptions): Promise<Post[]> {
+  const url = new URL("/api/posts", getApiUrl());
+  
+  if (options?.lat !== undefined) {
+    url.searchParams.set("lat", options.lat.toString());
+  }
+  if (options?.lng !== undefined) {
+    url.searchParams.set("lng", options.lng.toString());
+  }
+  if (options?.radius !== undefined) {
+    url.searchParams.set("radius", options.radius.toString());
+  }
+  
+  const response = await fetch(url.toString());
   if (!response.ok) {
     throw new Error("Failed to fetch posts");
   }
@@ -108,4 +137,169 @@ export async function submitReport(
     const error = await response.json();
     throw new Error(error.error || "Failed to submit report");
   }
+}
+
+// ============================================
+// User Location API
+// ============================================
+
+export async function updateUserLocation(
+  userId: string,
+  location: UserLocation,
+): Promise<void> {
+  const response = await fetch(
+    new URL(`/api/users/${userId}`, getApiUrl()).toString(),
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(location),
+    },
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to update location");
+  }
+}
+
+// ============================================
+// Conversation & Messaging API
+// ============================================
+
+export async function fetchMeetingInfo(): Promise<MeetingInfo> {
+  const response = await fetch(
+    new URL("/api/meeting-info", getApiUrl()).toString(),
+  );
+  if (!response.ok) {
+    throw new Error("Failed to fetch meeting info");
+  }
+  return response.json();
+}
+
+export async function startConversation(
+  userId: string,
+  postId: string,
+): Promise<Conversation> {
+  const response = await fetch(
+    new URL("/api/conversations", getApiUrl()).toString(),
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, postId }),
+    },
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to start conversation");
+  }
+  return response.json();
+}
+
+export async function fetchUserConversations(
+  userId: string,
+): Promise<Conversation[]> {
+  const response = await fetch(
+    new URL(`/api/conversations/user/${userId}`, getApiUrl()).toString(),
+  );
+  if (!response.ok) {
+    throw new Error("Failed to fetch conversations");
+  }
+  return response.json();
+}
+
+export async function fetchConversationMessages(
+  conversationId: string,
+  userId: string,
+): Promise<Message[]> {
+  const url = new URL(
+    `/api/conversations/${conversationId}/messages`,
+    getApiUrl(),
+  );
+  url.searchParams.set("userId", userId);
+
+  const response = await fetch(url.toString());
+  if (!response.ok) {
+    throw new Error("Failed to fetch messages");
+  }
+  return response.json();
+}
+
+export async function sendMessage(
+  conversationId: string,
+  userId: string,
+  content: string,
+): Promise<Message> {
+  const response = await fetch(
+    new URL(
+      `/api/conversations/${conversationId}/messages`,
+      getApiUrl(),
+    ).toString(),
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, content }),
+    },
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to send message");
+  }
+  return response.json();
+}
+
+export async function setMeetingDetails(
+  conversationId: string,
+  userId: string,
+  meeting: MeetingDetails,
+): Promise<Conversation> {
+  const response = await fetch(
+    new URL(
+      `/api/conversations/${conversationId}/meeting`,
+      getApiUrl(),
+    ).toString(),
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId,
+        meetingLocation: meeting.location,
+        meetingAddress: meeting.address,
+        meetingLatitude: meeting.latitude,
+        meetingLongitude: meeting.longitude,
+        meetingTime: meeting.time ? new Date(meeting.time).toISOString() : undefined,
+        meetingNotes: meeting.notes,
+      }),
+    },
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to set meeting details");
+  }
+  return response.json();
+}
+
+export async function completeConversation(
+  conversationId: string,
+  userId: string,
+): Promise<Conversation> {
+  const response = await fetch(
+    new URL(
+      `/api/conversations/${conversationId}/complete`,
+      getApiUrl(),
+    ).toString(),
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId }),
+    },
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to complete conversation");
+  }
+  return response.json();
 }

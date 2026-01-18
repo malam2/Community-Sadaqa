@@ -8,7 +8,7 @@ import Animated, {
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 
-import { ThemedText } from "@/components/primitives/ThemedText";
+import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { BorderRadius, Spacing } from "@/constants/theme";
 
@@ -72,7 +72,6 @@ export function FilterChip({
       onPress={handlePress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      accessibilityRole="button"
       style={[styles.chip, animatedStyle]}
     >
       <ThemedText

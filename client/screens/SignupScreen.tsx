@@ -17,6 +17,7 @@ import {
   ThemedText,
   FormInput,
   Button,
+  LocationPicker,
 } from "@/components";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
@@ -24,6 +25,7 @@ import { signup } from "@/lib/auth";
 import { getErrorMessage } from "@/lib/errorUtils";
 import { Spacing } from "@/constants/theme";
 import { AuthStackParamList } from "@/navigation/AuthStackNavigator";
+import { UserLocation } from "@/types/location";
 
 export default function SignupScreen() {
   const insets = useSafeAreaInsets();
@@ -36,6 +38,7 @@ export default function SignupScreen() {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
+  const [location, setLocation] = React.useState<UserLocation>({});
   const [isLoading, setIsLoading] = React.useState(false);
 
   const isFormValid =
@@ -54,7 +57,24 @@ export default function SignupScreen() {
 
     setIsLoading(true);
     try {
-      const user = await signup(email.trim(), password, displayName.trim());
+      const hasLocationData = location.city || location.latitude;
+      const locationData = hasLocationData
+        ? {
+            city: location.city,
+            state: location.state,
+            zipCode: location.zipCode,
+            latitude: location.latitude,
+            longitude: location.longitude,
+            locationRadius: location.locationRadius,
+          }
+        : undefined;
+
+      const user = await signup(
+        email.trim(),
+        password,
+        displayName.trim(),
+        locationData,
+      );
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setUser(user);
     } catch (error) {
@@ -153,6 +173,21 @@ export default function SignupScreen() {
             testID="input-confirm-password"
           />
 
+          <View style={styles.locationSection}>
+            <ThemedText
+              type="small"
+              style={[styles.locationHelp, { color: theme.textSecondary }]}
+            >
+              📍 Your location helps show you nearby posts
+            </ThemedText>
+            <LocationPicker
+              value={location}
+              onChange={setLocation}
+              showRadius
+              label="Your Location (Optional)"
+            />
+          </View>
+
           <Button
             onPress={handleSignup}
             disabled={!isFormValid || isLoading}
@@ -215,6 +250,13 @@ const styles = StyleSheet.create({
   },
   form: {
     marginBottom: Spacing["2xl"],
+  },
+  locationSection: {
+    marginTop: Spacing.lg,
+  },
+  locationHelp: {
+    marginBottom: Spacing.sm,
+    textAlign: "center",
   },
   button: {
     marginTop: Spacing.lg,

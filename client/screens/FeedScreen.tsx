@@ -7,6 +7,7 @@ import {
   RefreshControl,
   TextInput,
   Keyboard,
+  Pressable,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
@@ -18,6 +19,7 @@ import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { useTheme } from "@/hooks/useTheme";
+import { useAuth } from "@/contexts/AuthContext";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import {
   FilterChip,
@@ -33,6 +35,7 @@ import {
 import { Post, PostType, PostCategory, CATEGORIES } from "@/types/post";
 import { usePostsQuery } from "@/hooks/queries";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
+import { RADIUS_OPTIONS, DEFAULT_RADIUS } from "@/types/location";
 
 const WELCOME_BANNER_KEY = "@welcome_banner_collapsed";
 
@@ -64,6 +67,7 @@ export default function FeedScreen() {
   const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
   const { theme } = useTheme();
+  const { user } = useAuth();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
@@ -91,7 +95,16 @@ export default function FeedScreen() {
   const [searchQuery, setSearchQuery] = React.useState("");
   const debouncedSearch = useDebounce(searchQuery, 300);
 
-  // React Query
+  // Location-based filtering state
+  const [selectedRadius, setSelectedRadius] = React.useState<number>(
+    user?.locationRadius ?? DEFAULT_RADIUS
+  );
+  const [showRadiusDropdown, setShowRadiusDropdown] = React.useState(false);
+
+  // Check if user has location set
+  const hasUserLocation = !!(user?.latitude && user?.longitude);
+
+  // React Query - with location filtering when available
   const {
     data: posts = [],
     isLoading,
@@ -102,6 +115,10 @@ export default function FeedScreen() {
     category: activeCategoryFilter ?? undefined,
     urgent: activeFilter === "urgent" ? true : undefined,
     search: debouncedSearch || undefined,
+    // Pass location for proximity filtering (only if user has location)
+    lat: hasUserLocation ? user.latitude : undefined,
+    lng: hasUserLocation ? user.longitude : undefined,
+    radius: hasUserLocation ? selectedRadius : undefined,
   });
 
   const handleRefresh = () => {
@@ -241,6 +258,79 @@ export default function FeedScreen() {
         ))}
       </ScrollView>
 
+      {/* Location Radius Filter */}
+      {hasUserLocation && (
+        <View style={styles.radiusFilterContainer}>
+          <Feather name="map-pin" size={14} color={theme.textSecondary} />
+          <ThemedText type="small" style={{ color: theme.textSecondary, marginLeft: Spacing.xs }}>
+            Within
+          </ThemedText>
+          <Pressable
+            style={[
+              styles.radiusDropdown,
+              { backgroundColor: theme.backgroundSecondary, borderColor: theme.border },
+            ]}
+            onPress={() => setShowRadiusDropdown(!showRadiusDropdown)}
+          >
+            <ThemedText type="small" style={{ color: theme.text }}>
+              {selectedRadius} mi
+            </ThemedText>
+            <Feather
+              name={showRadiusDropdown ? "chevron-up" : "chevron-down"}
+              size={14}
+              color={theme.textSecondary}
+            />
+          </Pressable>
+          {showRadiusDropdown && (
+            <View
+              style={[
+                styles.radiusDropdownMenu,
+                { backgroundColor: theme.backgroundSecondary, borderColor: theme.border },
+              ]}
+            >
+              {RADIUS_OPTIONS.map((option) => (
+                <Pressable
+                  key={option.value}
+                  style={[
+                    styles.radiusOption,
+                    selectedRadius === option.value && { backgroundColor: theme.primary + "15" },
+                  ]}
+                  onPress={() => {
+                    setSelectedRadius(option.value);
+                    setShowRadiusDropdown(false);
+                  }}
+                >
+                  <ThemedText
+                    type="small"
+                    style={{
+                      color: selectedRadius === option.value ? theme.primary : theme.text,
+                    }}
+                  >
+                    {option.label}
+                  </ThemedText>
+                </Pressable>
+              ))}
+            </View>
+          )}
+        </View>
+      )}
+
+      {!hasUserLocation && (
+        <Pressable
+          style={[
+            styles.locationPrompt,
+            { backgroundColor: theme.primary + "10", borderColor: theme.primary + "30" },
+          ]}
+          onPress={() => navigation.navigate("Profile" as any)}
+        >
+          <Feather name="map-pin" size={16} color={theme.primary} />
+          <ThemedText type="small" style={{ color: theme.primary, marginLeft: Spacing.sm, flex: 1 }}>
+            Set your location to see posts near you
+          </ThemedText>
+          <Feather name="chevron-right" size={16} color={theme.primary} />
+        </Pressable>
+      )}
+
       {/* Encouragement Message */}
       {posts.length > 0 && <EncouragementBadge />}
     </View>
@@ -360,5 +450,48 @@ const styles = StyleSheet.create({
   emptyQuoteContainer: {
     marginTop: Spacing.lg,
     paddingHorizontal: Spacing.lg,
+  },
+  radiusFilterContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: Spacing.md,
+    position: "relative",
+    zIndex: 10,
+  },
+  radiusDropdown: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: Spacing.xs,
+    paddingHorizontal: Spacing.sm,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+    marginLeft: Spacing.sm,
+    gap: Spacing.xs,
+  },
+  radiusDropdownMenu: {
+    position: "absolute",
+    top: 32,
+    left: 60,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+    paddingVertical: Spacing.xs,
+    minWidth: 120,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  radiusOption: {
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+  },
+  locationPrompt: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: Spacing.md,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+    marginBottom: Spacing.md,
   },
 });
