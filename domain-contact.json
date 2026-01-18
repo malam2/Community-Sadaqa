@@ -1,0 +1,44 @@
+{
+  "address1": {
+    "value": "24088 Highcrest Dr"
+  },
+  "address2": {
+    "value": ""
+  },
+  "city": {
+    "value": "Diamond Bar"
+  },
+  "country": {
+    "value": "US"
+  },
+  "postal_code": {
+    "value": "91765"
+  },
+  "state": {
+    "value": "CA"
+  },
+  "email": {
+    "value": "tuhin192@gmail.com"
+  },
+  "fax": {
+    "value": ""
+  },
+  "job_title": {
+    "value": ""
+  },
+  "name_first": {
+    "value": "Mohammed"
+  },
+  "name_last": {
+    "value": "Tuhin"
+  },
+  "name_middle": {
+    "value": ""
+  },
+  "organization": {
+    "value": ""
+  },
+  "phone": {
+    "value": "+1.2136636797"
+  }
+}

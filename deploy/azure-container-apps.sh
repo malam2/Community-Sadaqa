@@ -6,7 +6,7 @@ set -e
 
 # Configuration - Update these values
 RESOURCE_GROUP="sadaqa-rg"
-LOCATION="eastus"
+LOCATION="westus2"
 CONTAINER_REGISTRY="sadaqaregistry"
 CONTAINER_APP_ENV="sadaqa-env"
 CONTAINER_APP_NAME="sadaqa-api"
