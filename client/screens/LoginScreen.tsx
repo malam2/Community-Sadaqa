@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
   },
   guestButton: {
     paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.sm,
     borderWidth: 1.5,
     alignItems: "center",
     justifyContent: "center",

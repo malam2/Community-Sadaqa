@@ -128,8 +128,10 @@ function getCategoryIcon(category: string): keyof typeof Feather.glyphMap {
 const styles = StyleSheet.create({
   card: {
     padding: Spacing.lg,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.sm,
     marginBottom: Spacing.md,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "transparent",
   },
   header: {
     flexDirection: "row",

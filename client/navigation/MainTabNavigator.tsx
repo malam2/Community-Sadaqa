@@ -120,9 +120,9 @@ export default function MainTabNavigator() {
           tabBarAccessibilityLabel: "Feed",
           tabBarIcon: ({ focused, size }) => (
             <Feather
-              name="home"
+              name="compass"
               size={size}
-              color={focused ? theme.primary : theme.text}
+              color={focused ? theme.primary : theme.tabIconDefault}
             />
           ),
         }}
@@ -151,7 +151,7 @@ export default function MainTabNavigator() {
             <Feather
               name="user"
               size={size}
-              color={focused ? theme.primary : theme.text}
+              color={focused ? theme.primary : theme.tabIconDefault}
             />
           ),
         }}
@@ -168,9 +168,9 @@ const styles = StyleSheet.create({
     paddingTop: Platform.select({ ios: 0, android: 4 }),
   },
   createButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 52,
+    height: 52,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
     marginTop: -16,

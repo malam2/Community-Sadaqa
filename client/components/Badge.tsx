@@ -1,5 +1,6 @@
 import React from "react";
-import { View, StyleSheet, Image } from "react-native";
+import { View, StyleSheet } from "react-native";
+import { Feather } from "@expo/vector-icons";
 
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
@@ -68,10 +69,11 @@ export function Badge({ variant, small = false }: BadgeProps) {
       ]}
     >
       {variant === "anonymous" ? (
-        <Image
-          source={require("../../assets/images/anonymous-indicator.png")}
-          style={small ? styles.iconSmall : styles.icon}
-          resizeMode="contain"
+        <Feather
+          name="eye-off"
+          size={small ? 9 : 12}
+          color={config.textColor}
+          style={{ marginRight: small ? 2 : 4 }}
         />
       ) : null}
       <ThemedText
@@ -90,31 +92,23 @@ const styles = StyleSheet.create({
   badge: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: Spacing.xs,
+    paddingVertical: 3,
     paddingHorizontal: Spacing.sm,
-    borderRadius: BorderRadius.xs,
+    borderRadius: BorderRadius.full,
     alignSelf: "flex-start",
   },
   badgeSmall: {
     paddingVertical: 2,
-    paddingHorizontal: Spacing.xs,
+    paddingHorizontal: 6,
   },
   text: {
     fontSize: 12,
     fontWeight: "600",
+    letterSpacing: 0.1,
   },
   textSmall: {
     fontSize: 10,
     fontWeight: "600",
-  },
-  icon: {
-    width: 14,
-    height: 14,
-    marginRight: 4,
-  },
-  iconSmall: {
-    width: 10,
-    height: 10,
-    marginRight: 2,
+    letterSpacing: 0.1,
   },
 });

@@ -1,9 +1,10 @@
 import React from "react";
-import { View, StyleSheet, Image } from "react-native";
+import { View, StyleSheet } from "react-native";
+import { Feather } from "@expo/vector-icons";
 
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
-import { Spacing } from "@/constants/theme";
+import { Spacing, BorderRadius } from "@/constants/theme";
 
 interface HeaderTitleProps {
   title: string;
@@ -11,17 +12,22 @@ interface HeaderTitleProps {
 }
 
 export function HeaderTitle({ title, subtitle }: HeaderTitleProps) {
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
 
   return (
     <View style={styles.container}>
-      <Image
-        source={require("../../assets/images/icon.png")}
-        style={styles.icon}
-        resizeMode="contain"
-      />
+      <View
+        style={[
+          styles.iconWrapper,
+          {
+            backgroundColor: isDark ? theme.primaryLight : theme.primaryLight,
+          },
+        ]}
+      >
+        <Feather name="heart" size={16} color={theme.primary} />
+      </View>
       <View style={styles.textContainer}>
-        <ThemedText style={[styles.title, { color: theme.primary }]}>
+        <ThemedText style={[styles.title, { color: theme.text }]}>
           {title}
         </ThemedText>
         {subtitle && (
@@ -39,12 +45,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-start",
+    gap: Spacing.sm,
   },
-  icon: {
-    width: 28,
-    height: 28,
-    marginRight: Spacing.sm,
-    borderRadius: 6,
+  iconWrapper: {
+    width: 30,
+    height: 30,
+    borderRadius: BorderRadius.xs,
+    alignItems: "center",
+    justifyContent: "center",
   },
   textContainer: {
     flexDirection: "column",
@@ -52,10 +60,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 17,
     fontWeight: "700",
+    letterSpacing: -0.3,
   },
   subtitle: {
     fontSize: 11,
     fontWeight: "500",
-    marginTop: -2,
+    marginTop: -1,
+    letterSpacing: 0.1,
   },
+});
 });

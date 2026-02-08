@@ -1,87 +1,87 @@
 import { Platform } from "react-native";
 
 /**
- * Inspired by Uber's clean contrast, LinkedIn's professional clarity,
- * and PayPal's trustworthy feel. Optimized for readability and accessibility.
+ * Modern minimal design system — inspired by Arc Browser, Linear, and Notion.
+ * Teal-emerald primary for trust and growth. Refined spacing, subtle surfaces.
  */
 export const Colors = {
   light: {
-    // Text - High contrast like Uber/LinkedIn for maximum readability
-    text: "#000000", // Pure black for headlines - Uber style
-    textSecondary: "#545454", // Darker gray for better readability
-    textTertiary: "#767676", // Accessible gray (4.5:1 contrast)
+    // Text — sharp hierarchy
+    text: "#0F172A", // Slate-900: softer than pure black, easier on eyes
+    textSecondary: "#475569", // Slate-600: readable, professional
+    textTertiary: "#94A3B8", // Slate-400: subtle labels, timestamps
     buttonText: "#FFFFFF",
 
     // Tab/Navigation
-    tabIconDefault: "#8F8F8F",
-    tabIconSelected: "#0D7A4F", // Deeper green for better contrast
+    tabIconDefault: "#94A3B8",
+    tabIconSelected: "#0D9488", // Teal-600: fresh, modern
 
-    // Brand Colors - Refined green palette (growth/generosity)
-    link: "#0D7A4F",
-    primary: "#0D7A4F", // Richer, more professional green
-    primaryLight: "#E6F4ED",
-    primaryVariant: "#0A5C3B", // Darker variant for hover states
+    // Brand — Teal-Emerald gradient feel
+    link: "#0D9488",
+    primary: "#0D9488", // Teal-600: trust + growth, modern and fresh
+    primaryLight: "#F0FDFA", // Teal-50: whisper-light tint
+    primaryVariant: "#0F766E", // Teal-700: pressed/hover state
 
-    // Status Colors - More refined
-    urgent: "#C41E3A", // Deeper red, more serious
-    urgentLight: "#FDE8EC",
-    success: "#0D7A4F",
+    // Status
+    urgent: "#DC2626", // Red-600: clear urgency
+    urgentLight: "#FEF2F2",
+    success: "#059669", // Emerald-600
 
     // Special States
-    anonymous: "#5B2D90", // Deeper purple for distinction
-    anonymousLight: "#F3EDFA",
-    accent: "#B86E00", // Warmer amber, better contrast
-    accentLight: "#FFF4E5",
+    anonymous: "#7C3AED", // Violet-600: distinct, premium feel
+    anonymousLight: "#F5F3FF",
+    accent: "#D97706", // Amber-600: warm highlights
+    accentLight: "#FFFBEB",
 
-    // Backgrounds - Clean whites like Uber
-    backgroundRoot: "#FFFFFF", // Pure white root - Uber style
+    // Backgrounds — layered glass-like surfaces
+    backgroundRoot: "#FAFAFA", // Warm off-white, not sterile
     backgroundDefault: "#FFFFFF",
-    backgroundSecondary: "#F7F7F7", // Subtle gray - LinkedIn style
-    backgroundTertiary: "#EBEBEB",
+    backgroundSecondary: "#F1F5F9", // Slate-100: subtle depth
+    backgroundTertiary: "#E2E8F0", // Slate-200
 
-    // Borders - Subtle but visible
-    border: "#E0E0E0",
-    borderLight: "#F0F0F0",
-    cardShadow: "rgba(0, 0, 0, 0.08)",
+    // Borders — barely there
+    border: "#E2E8F0",
+    borderLight: "#F1F5F9",
+    cardShadow: "rgba(15, 23, 42, 0.06)",
   },
   dark: {
-    // Text - Cream whites for better eye comfort
-    text: "#FFFFFF", // Pure white headlines
-    textSecondary: "#B8B8B8",
-    textTertiary: "#8A8A8A",
+    // Text — warm whites
+    text: "#F8FAFC", // Slate-50
+    textSecondary: "#CBD5E1", // Slate-300
+    textTertiary: "#64748B", // Slate-500
     buttonText: "#FFFFFF",
 
     // Tab/Navigation
-    tabIconDefault: "#6B6B6B",
-    tabIconSelected: "#4ADE80",
+    tabIconDefault: "#475569",
+    tabIconSelected: "#2DD4BF", // Teal-400: vibrant in dark
 
-    // Brand Colors
-    link: "#4ADE80",
-    primary: "#4ADE80", // Brighter green for dark mode
-    primaryLight: "#0F2E1F",
-    primaryVariant: "#22C55E",
+    // Brand
+    link: "#2DD4BF",
+    primary: "#2DD4BF", // Teal-400: luminous in dark mode
+    primaryLight: "#042F2E", // Teal-950: deep tint
+    primaryVariant: "#14B8A6", // Teal-500
 
-    // Status Colors
-    urgent: "#F87171",
-    urgentLight: "#3D1519",
-    success: "#4ADE80",
+    // Status
+    urgent: "#EF4444",
+    urgentLight: "#2D1519",
+    success: "#34D399",
 
     // Special States
-    anonymous: "#C4A7E7",
-    anonymousLight: "#2D1F4A",
+    anonymous: "#A78BFA", // Violet-400
+    anonymousLight: "#1E1533",
     accent: "#FBBF24",
-    accentLight: "#3D2F0D",
+    accentLight: "#2D2408",
 
-    // Backgrounds - Deep blacks like Uber dark mode
-    backgroundRoot: "#000000", // Pure black - Uber style
-    backgroundDefault: "#161616",
-    backgroundSecondary: "#242424",
-    backgroundTertiary: "#363636",
+    // Backgrounds — rich dark layers
+    backgroundRoot: "#0C0C0C", // Almost black, not pure
+    backgroundDefault: "#141414",
+    backgroundSecondary: "#1E1E1E",
+    backgroundTertiary: "#2A2A2A",
 
     // Borders
-    border: "#363636",
-    borderLight: "#242424",
-    cardShadow: "rgba(0, 0, 0, 0.5)",
+    border: "#2A2A2A",
+    borderLight: "#1E1E1E",
+    cardShadow: "rgba(0, 0, 0, 0.4)",
   },
 };
 
@@ -100,10 +100,10 @@ export const Spacing = {
 };
 
 export const BorderRadius = {
-  xs: 6,
-  sm: 10,
-  md: 14,
-  lg: 20,
+  xs: 8,
+  sm: 12,
+  md: 16,
+  lg: 22,
   xl: 28,
   "2xl": 36,
   "3xl": 44,
@@ -111,126 +111,120 @@ export const BorderRadius = {
 };
 
 /**
- * Typography system inspired by:
- * - Uber: Bold, high-impact headlines with excellent hierarchy
- * - LinkedIn: Clear, professional body text with good line height
- * - PayPal: Trust-inspiring, readable sizing
+ * Typography — tight headlines, comfortable body. Inspired by Linear & Arc.
  */
 export const Typography = {
-  // Headlines - Bold and impactful like Uber
   h1: {
-    fontSize: 32,
-    lineHeight: 40,
-    fontWeight: "800" as const, // Extra bold for impact
-    letterSpacing: -0.5,
+    fontSize: 30,
+    lineHeight: 36,
+    fontWeight: "800" as const,
+    letterSpacing: -0.8,
   },
   h2: {
-    fontSize: 26,
-    lineHeight: 34,
+    fontSize: 24,
+    lineHeight: 30,
     fontWeight: "700" as const,
-    letterSpacing: -0.3,
+    letterSpacing: -0.5,
   },
   h3: {
-    fontSize: 20,
-    lineHeight: 28,
+    fontSize: 19,
+    lineHeight: 26,
     fontWeight: "600" as const,
-    letterSpacing: -0.2,
+    letterSpacing: -0.3,
   },
   h4: {
-    fontSize: 17,
-    lineHeight: 24,
-    fontWeight: "600" as const,
-    letterSpacing: 0,
-  },
-  // Body - Optimized for readability like LinkedIn
-  body: {
     fontSize: 16,
-    lineHeight: 26, // Increased line height for better readability
+    lineHeight: 22,
+    fontWeight: "600" as const,
+    letterSpacing: -0.1,
+  },
+  body: {
+    fontSize: 15,
+    lineHeight: 24,
     fontWeight: "400" as const,
-    letterSpacing: 0.1,
+    letterSpacing: 0,
   },
   // Supporting text
   small: {
-    fontSize: 14,
-    lineHeight: 22,
+    fontSize: 13,
+    lineHeight: 20,
     fontWeight: "400" as const,
-    letterSpacing: 0.1,
+    letterSpacing: 0,
   },
   caption: {
-    fontSize: 12,
-    lineHeight: 18,
-    fontWeight: "500" as const, // Medium weight for better visibility
-    letterSpacing: 0.2,
+    fontSize: 11,
+    lineHeight: 16,
+    fontWeight: "500" as const,
+    letterSpacing: 0.3,
   },
   // Interactive text
   link: {
-    fontSize: 16,
-    lineHeight: 26,
-    fontWeight: "600" as const, // Semibold links for clear CTAs
-    letterSpacing: 0,
-  },
-  // Button text - Like PayPal's clear CTAs
-  button: {
-    fontSize: 16,
+    fontSize: 15,
     lineHeight: 24,
     fontWeight: "600" as const,
-    letterSpacing: 0.3,
+    letterSpacing: 0,
+  },
+  // Button text
+  button: {
+    fontSize: 15,
+    lineHeight: 22,
+    fontWeight: "600" as const,
+    letterSpacing: 0.2,
   },
   // Labels
   label: {
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: 12,
+    lineHeight: 16,
     fontWeight: "600" as const,
-    letterSpacing: 0.4,
+    letterSpacing: 0.5,
     textTransform: "uppercase" as const,
   },
 };
 
 /**
- * Refined shadow system - Subtle like PayPal/LinkedIn
+ * Shadows — soft, layered depth. More diffuse for modern feel.
  */
 export const Shadows = {
   card: {
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  cardHover: {
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
-    elevation: 4,
-  },
-  cardPressed: {
-    shadowColor: "#000000",
+    shadowColor: "#0F172A",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
-    shadowRadius: 4,
+    shadowRadius: 6,
     elevation: 1,
   },
+  cardHover: {
+    shadowColor: "#0F172A",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 3,
+  },
+  cardPressed: {
+    shadowColor: "#0F172A",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.02,
+    shadowRadius: 2,
+    elevation: 0,
+  },
   fab: {
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
+    shadowColor: "#0D9488",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
     shadowRadius: 12,
     elevation: 6,
   },
   subtle: {
-    shadowColor: "#000000",
+    shadowColor: "#0F172A",
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.03,
-    shadowRadius: 3,
-    elevation: 1,
+    shadowOpacity: 0.02,
+    shadowRadius: 2,
+    elevation: 0,
   },
-  // New: Modal/overlay shadow
   modal: {
     shadowColor: "#000000",
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
-    shadowRadius: 24,
+    shadowOpacity: 0.15,
+    shadowRadius: 30,
     elevation: 10,
   },
 };

@@ -86,12 +86,14 @@ export function FilterChip({
 
 const styles = StyleSheet.create({
   chip: {
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.xl,
-    borderRadius: BorderRadius.lg,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
+    borderRadius: BorderRadius.full,
     marginRight: Spacing.sm,
   },
   label: {
-    fontWeight: "500",
+    fontWeight: "600",
+    fontSize: 13,
+    letterSpacing: 0.1,
   },
 });

@@ -20,30 +20,30 @@ interface QuickAction {
 const QUICK_ACTIONS: QuickAction[] = [
   {
     id: "request",
-    icon: "help-circle",
+    icon: "message-circle",
     label: "Need Help?",
     description: "Post a request",
-    color: "#10B981",
-    lightBg: "#D1FAE5",
-    darkBg: "#064E3B",
+    color: "#0D9488",
+    lightBg: "#F0FDFA",
+    darkBg: "#042F2E",
   },
   {
     id: "offer",
-    icon: "heart",
+    icon: "gift",
     label: "Want to Help?",
     description: "Offer your support",
-    color: "#F59E0B",
-    lightBg: "#FEF3C7",
-    darkBg: "#78350F",
+    color: "#D97706",
+    lightBg: "#FFFBEB",
+    darkBg: "#451A03",
   },
   {
     id: "urgent",
-    icon: "alert-circle",
+    icon: "zap",
     label: "Urgent Need?",
     description: "Mark as priority",
-    color: "#EF4444",
-    lightBg: "#FEE2E2",
-    darkBg: "#7F1D1D",
+    color: "#DC2626",
+    lightBg: "#FEF2F2",
+    darkBg: "#450A0A",
   },
 ];
 
@@ -136,19 +136,19 @@ export function CommunityStats({ stats }: CommunityStatsProps) {
       value: displayStats.activeRequests,
       label: "Active Requests",
       icon: "inbox" as const,
-      color: "#10B981",
+      color: "#0D9488",
     },
     {
       value: displayStats.fulfilledToday,
       label: "Helped Today",
       icon: "check-circle" as const,
-      color: "#F59E0B",
+      color: "#D97706",
     },
     {
       value: displayStats.communityMembers,
       label: "Members",
       icon: "users" as const,
-      color: "#8B5CF6",
+      color: "#7C3AED",
     },
   ];
 
@@ -210,12 +210,12 @@ interface EncouragementBadgeProps {
 }
 
 const ENCOURAGEMENT_MESSAGES = [
-  "Every act of kindness, no matter how small, makes a difference 💚",
-  "Together, we can uplift our community 🤲",
-  "Your generosity inspires others to give 🌟",
-  "Be the change you wish to see in your community ✨",
-  "Small steps lead to great journeys of kindness 🌱",
-  "The ummah is one body; when one part suffers, all feel it 🤝",
+  "Every act of kindness, no matter how small, makes a difference.",
+  "Together, we can uplift our community.",
+  "Your generosity inspires others to give.",
+  "Be the change you wish to see in your community.",
+  "Small steps lead to great journeys of kindness.",
+  "The ummah is one body; when one part suffers, all feel it.",
 ];
 
 export function EncouragementBadge({ message }: EncouragementBadgeProps) {
@@ -231,8 +231,8 @@ export function EncouragementBadge({ message }: EncouragementBadgeProps) {
       style={[
         styles.encouragementContainer,
         {
-          backgroundColor: isDark ? "#1E293B" : "#F0FDF4",
-          borderColor: isDark ? "#334155" : "#BBF7D0",
+          backgroundColor: isDark ? "#1E293B" : "#F0FDFA",
+          borderColor: isDark ? "#334155" : "#99F6E4",
         },
       ]}
     >
@@ -240,7 +240,7 @@ export function EncouragementBadge({ message }: EncouragementBadgeProps) {
         type="small"
         style={[
           styles.encouragementText,
-          { color: isDark ? "#A7F3D0" : "#166534" },
+          { color: isDark ? "#5EEAD4" : "#0F766E" },
         ]}
       >
         {randomMessage}

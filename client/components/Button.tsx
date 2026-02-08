@@ -102,12 +102,13 @@ export function Button({
 const styles = StyleSheet.create({
   button: {
     height: Spacing.buttonHeight,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.sm,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: Spacing["2xl"],
   },
   buttonText: {
     fontWeight: "600",
+    letterSpacing: 0.2,
   },
 });
