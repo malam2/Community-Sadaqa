@@ -5,7 +5,6 @@ import {
   Pressable,
   ActivityIndicator,
 } from "react-native";
-import { showAlert } from "@/lib/alert";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -18,6 +17,7 @@ import {
   FormInput,
   Button,
   LocationPicker,
+  toast,
 } from "@/components";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
@@ -40,18 +40,42 @@ export default function SignupScreen() {
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [location, setLocation] = React.useState<UserLocation>({});
   const [isLoading, setIsLoading] = React.useState(false);
+  const [hasSubmitted, setHasSubmitted] = React.useState(false);
+
+  // Inline validation errors (shown after first submit attempt)
+  const nameError =
+    hasSubmitted && displayName.trim().length < 2
+      ? "Name must be at least 2 characters"
+      : undefined;
+  const emailError =
+    hasSubmitted && email.trim().length === 0
+      ? "Email is required"
+      : hasSubmitted && !/\S+@\S+\.\S+/.test(email.trim())
+        ? "Please enter a valid email address"
+        : undefined;
+  const passwordError =
+    hasSubmitted && password.length < 6
+      ? "Password must be at least 6 characters"
+      : undefined;
+  const confirmPasswordError =
+    confirmPassword.length > 0 && password !== confirmPassword
+      ? "Passwords do not match"
+      : hasSubmitted && confirmPassword.length === 0
+        ? "Please confirm your password"
+        : undefined;
 
   const isFormValid =
     displayName.trim().length >= 2 &&
-    email.trim().length > 0 &&
+    /\S+@\S+\.\S+/.test(email.trim()) &&
     password.length >= 6 &&
     password === confirmPassword;
 
   const handleSignup = async () => {
-    if (!isFormValid) return;
+    setHasSubmitted(true);
 
-    if (password !== confirmPassword) {
-      showAlert("Error", "Passwords do not match");
+    if (!isFormValid) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      toast.error("Please fix the errors below");
       return;
     }
 
@@ -76,12 +100,13 @@ export default function SignupScreen() {
         locationData,
       );
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      toast.success("Welcome!", "Your account has been created.");
       setUser(user);
     } catch (error) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      showAlert(
+      toast.error(
         "Signup Failed",
-        getErrorMessage(error) || "Please try again.",
+        getErrorMessage(error) || "Something went wrong. Please try again.",
       );
     } finally {
       setIsLoading(false);
@@ -106,7 +131,7 @@ export default function SignupScreen() {
       >
         <Animated.View entering={FadeInDown.delay(100).duration(400)}>
           <ThemedText type="h1" style={styles.title}>
-            Join One Ummah
+            Join 1 Sadaqa
           </ThemedText>
           <ThemedText
             type="body"
@@ -135,6 +160,7 @@ export default function SignupScreen() {
             autoCapitalize="words"
             autoComplete="name"
             testID="signup-name"
+            error={nameError}
           />
 
           <FormInput
@@ -146,6 +172,7 @@ export default function SignupScreen() {
             autoCapitalize="none"
             autoComplete="email"
             testID="signup-email"
+            error={emailError}
           />
 
           <FormInput
@@ -156,6 +183,7 @@ export default function SignupScreen() {
             secureTextEntry
             autoComplete="new-password"
             testID="signup-password"
+            error={passwordError}
           />
 
           <FormInput
@@ -165,11 +193,7 @@ export default function SignupScreen() {
             placeholder="Enter password again"
             secureTextEntry
             autoComplete="new-password"
-            error={
-              confirmPassword.length > 0 && password !== confirmPassword
-                ? "Passwords do not match"
-                : undefined
-            }
+            error={confirmPasswordError}
             testID="signup-confirm-password"
           />
 

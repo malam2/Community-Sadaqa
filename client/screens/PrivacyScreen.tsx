@@ -34,7 +34,7 @@ export default function PrivacyScreen() {
       </ThemedText>
 
       <Section title="Information We Collect" theme={theme}>
-        One Ummah collects minimal information necessary to provide our
+        1 Sadaqa collects minimal information necessary to provide our
         service. This includes your email address, display name, optional
         location (city, state, ZIP code), and any posts you create.
       </Section>
@@ -78,7 +78,7 @@ export default function PrivacyScreen() {
 
       <Section title="Contact Us" theme={theme}>
         If you have any questions about this privacy policy or our practices,
-        please contact the One Ummah administration.
+        please contact the 1 Sadaqa administration.
       </Section>
 
       <ThemedText

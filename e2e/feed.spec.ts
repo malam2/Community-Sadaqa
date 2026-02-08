@@ -4,7 +4,7 @@ test.describe("Feed and Filtering", () => {
   test.beforeEach(async ({ page }) => {
     await page.context().clearCookies();
     await page.goto("/");
-    await expect(page.getByText("One Ummah")).toBeVisible({ timeout: 30000 });
+    await expect(page.getByText("1 Sadaqa")).toBeVisible({ timeout: 30000 });
 
     // Enter as guest for browsing tests
     await page.getByRole("button", { name: /continue as guest/i }).click();

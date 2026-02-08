@@ -96,13 +96,13 @@ export default function PostDetailScreen() {
         url = `tel:${contactPhone}`;
       } else if (method === "sms" && contactPhone) {
         const message = encodeURIComponent(
-          `Hi! I'm reaching out about your post "${title}" on Local Ummah.`,
+          `Hi! I'm reaching out about your post "${title}" on 1 Sadaqa.`,
         );
         url = `sms:${contactPhone}?body=${message}`;
       } else if (method === "email" && contactEmail) {
-        const subject = encodeURIComponent(`Re: ${title} - Local Ummah`);
+        const subject = encodeURIComponent(`Re: ${title} - 1 Sadaqa`);
         const body = encodeURIComponent(
-          `Hi!\n\nI'm reaching out about your post "${title}" on Local Ummah.\n\n`,
+          `Hi!\n\nI'm reaching out about your post "${title}" on 1 Sadaqa.\n\n`,
         );
         url = `mailto:${contactEmail}?subject=${subject}&body=${body}`;
       }
@@ -332,7 +332,7 @@ export default function PostDetailScreen() {
                 {currentPost.authorDisplayName || "Community Member"}
               </ThemedText>
               <ThemedText type="small" style={{ color: theme.textSecondary }}>
-                Local Ummah
+                1 Sadaqa
               </ThemedText>
             </View>
           </View>

@@ -17,7 +17,7 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: local_ummah
+          POSTGRES_DB: sadaqa
         ports:
           - 5432:5432
         options: >-
@@ -58,7 +58,7 @@ jobs:
 
       - name: Push database schema
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/local_ummah
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/sadaqa
         run: npm run db:push
 
       - name: Build server
@@ -66,7 +66,7 @@ jobs:
 
       - name: Run E2E tests
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/local_ummah
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/sadaqa
           CI: true
         run: npm test
 

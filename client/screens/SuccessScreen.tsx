@@ -73,8 +73,8 @@ export default function SuccessScreen() {
             style={[styles.description, { color: theme.textSecondary }]}
           >
             {isRequest
-              ? "Your request is now live! The ummah is here for you. May Allah send help your way through those eager to give."
-              : "JazakAllah khair! Your offer is now visible to those in need. You're making One Ummah stronger."}
+              ? "Your request is now live! The community is here for you. May Allah send help your way through those eager to give."
+              : "JazakAllah khair! Your offer is now visible to those in need. You're making 1 Sadaqa stronger."}
           </ThemedText>
         </Animated.View>
 

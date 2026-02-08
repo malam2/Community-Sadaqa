@@ -40,7 +40,7 @@ export default function AboutScreen({ onClose }: AboutScreenProps) {
       icon: "shield" as const,
       title: "Stand Together",
       description:
-        "A community that knows each other can withstand anything. That's the ummah we're building.",
+        "A community that knows each other can withstand anything. That's what we're building.",
     },
   ];
 
@@ -103,7 +103,7 @@ export default function AboutScreen({ onClose }: AboutScreenProps) {
                 { color: isDark ? "#F0FDF4" : "#064E3B" },
               ]}
             >
-              One Ummah
+              1 Sadaqa
             </ThemedText>
             <ThemedText
               style={[
@@ -141,14 +141,14 @@ export default function AboutScreen({ onClose }: AboutScreenProps) {
               type="h3"
               style={[styles.sectionTitle, { color: theme.text }]}
             >
-              Why One Ummah? 🎯
+              Why 1 Sadaqa? 🎯
             </ThemedText>
             <ThemedText
               style={[styles.missionText, { color: theme.textSecondary }]}
             >
               Many people are eager to help but can't find a centralized way to
               do so. At the same time, many need help but find it hard to ask
-              directly. One Ummah bridges that gap — creating a space where
+              directly. 1 Sadaqa bridges that gap — creating a space where
               giving is celebrated and asking is honored.{"\n\n"}Our ultimate
               vision: A strong community where members know each other, support
               each other, and can rise together through any challenge.
@@ -336,7 +336,7 @@ export default function AboutScreen({ onClose }: AboutScreenProps) {
             <ThemedText
               style={[styles.footerText, { color: theme.textTertiary }]}
             >
-              One Ummah • A Non-Profit Initiative 💚
+              1 Sadaqa • A Non-Profit Initiative 💚
             </ThemedText>
             <ThemedText
               style={[styles.footerVerse, { color: theme.textSecondary }]}

@@ -6,7 +6,6 @@ import {
   ActivityIndicator,
   Image,
 } from "react-native";
-import { showAlert } from "@/lib/alert";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -18,6 +17,7 @@ import {
   ThemedText,
   FormInput,
   Button,
+  toast,
 } from "@/components";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
@@ -37,11 +37,27 @@ export default function LoginScreen() {
   const [password, setPassword] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
   const [isGuestLoading, setIsGuestLoading] = React.useState(false);
+  const [hasSubmitted, setHasSubmitted] = React.useState(false);
+
+  const emailError =
+    hasSubmitted && email.trim().length === 0
+      ? "Email is required"
+      : undefined;
+  const passwordError =
+    hasSubmitted && password.length < 6
+      ? "Password must be at least 6 characters"
+      : undefined;
 
   const isFormValid = email.trim().length > 0 && password.length >= 6;
 
   const handleLogin = async () => {
-    if (!isFormValid) return;
+    setHasSubmitted(true);
+
+    if (!isFormValid) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      toast.error("Please fill in all fields");
+      return;
+    }
 
     setIsLoading(true);
     try {
@@ -50,7 +66,7 @@ export default function LoginScreen() {
       setUser(user);
     } catch (error) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      showAlert(
+      toast.error(
         "Login Failed",
         getErrorMessage(error) ||
           "Please check your credentials and try again.",
@@ -98,7 +114,7 @@ export default function LoginScreen() {
           </Animated.View>
           <Animated.View entering={FadeInDown.delay(200).duration(400)}>
             <ThemedText type="h1" style={styles.title}>
-              One Ummah
+              1 Sadaqa
             </ThemedText>
             <ThemedText
               type="body"
@@ -128,6 +144,7 @@ export default function LoginScreen() {
             autoCapitalize="none"
             autoComplete="email"
             testID="login-email"
+            error={emailError}
           />
 
           <FormInput
@@ -138,6 +155,7 @@ export default function LoginScreen() {
             secureTextEntry
             autoComplete="password"
             testID="login-password"
+            error={passwordError}
           />
 
           <Button

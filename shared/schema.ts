@@ -19,7 +19,7 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
   displayName: text("display_name").notNull(),
-  communityId: text("community_id").notNull().default("local_ummah"),
+  communityId: text("community_id").notNull().default("1_sadaqa"),
   // Location fields
   city: text("city"),
   state: text("state"),
@@ -36,7 +36,7 @@ export const posts = pgTable("posts", {
   id: varchar("id")
     .primaryKey()
     .default(sql`gen_random_uuid()`),
-  communityId: text("community_id").notNull().default("local_ummah"),
+  communityId: text("community_id").notNull().default("1_sadaqa"),
   type: text("type").notNull(), // 'request' | 'offer'
   category: text("category").notNull(),
   title: text("title").notNull(),

@@ -1,8 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getApiUrl } from "@/lib/query-client";
 
-const AUTH_KEY = "@local_ummah_auth";
-const TOKEN_KEY = "@local_ummah_token";
+const AUTH_KEY = "@1_sadaqa_auth";
+const TOKEN_KEY = "@1_sadaqa_token";
 
 // In-memory token cache for synchronous access
 let cachedToken: string | null = null;
@@ -27,7 +27,7 @@ export function createGuestUser(): AuthUser {
     id: `guest_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
     email: "",
     displayName: "Guest",
-    communityId: "local_ummah",
+    communityId: "1_sadaqa",
     isGuest: true,
   };
 }
@@ -106,46 +106,70 @@ export async function signup(
   displayName: string,
   location?: SignupLocationData,
 ): Promise<AuthUser> {
-  const response = await fetch(
-    new URL("/api/auth/signup", getApiUrl()).toString(),
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password, displayName, ...location }),
-    },
-  );
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.error || "Failed to create account");
+  let response: Response;
+  try {
+    response = await fetch(
+      new URL("/api/auth/signup", getApiUrl()).toString(),
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, displayName, ...location }),
+      },
+    );
+  } catch {
+    throw new Error(
+      "Unable to connect to the server. Please check your internet connection and try again.",
+    );
   }
 
-  await storeUser(data.user, data.token);
-  return data.user;
+  let data: Record<string, unknown>;
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error("Unexpected server response. Please try again later.");
+  }
+
+  if (!response.ok) {
+    throw new Error((data.error as string) || "Failed to create account");
+  }
+
+  await storeUser(data.user as AuthUser, data.token as string);
+  return data.user as AuthUser;
 }
 
 export async function login(
   email: string,
   password: string,
 ): Promise<AuthUser> {
-  const response = await fetch(
-    new URL("/api/auth/login", getApiUrl()).toString(),
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    },
-  );
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.error || "Failed to login");
+  let response: Response;
+  try {
+    response = await fetch(
+      new URL("/api/auth/login", getApiUrl()).toString(),
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      },
+    );
+  } catch {
+    throw new Error(
+      "Unable to connect to the server. Please check your internet connection and try again.",
+    );
   }
 
-  await storeUser(data.user, data.token);
-  return data.user;
+  let data: Record<string, unknown>;
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error("Unexpected server response. Please try again later.");
+  }
+
+  if (!response.ok) {
+    throw new Error((data.error as string) || "Invalid email or password");
+  }
+
+  await storeUser(data.user as AuthUser, data.token as string);
+  return data.user as AuthUser;
 }
 
 export async function logout(): Promise<void> {

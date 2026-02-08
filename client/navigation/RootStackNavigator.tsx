@@ -152,7 +152,7 @@ export default function RootStackNavigator() {
             name="About"
             component={AboutScreen}
             options={{
-              headerTitle: "About One Ummah",
+              headerTitle: "About 1 Sadaqa",
               presentation: "modal",
             }}
           />

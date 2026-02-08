@@ -68,7 +68,7 @@ export async function createPost(
   const response = await authFetch(new URL("/api/posts", getApiUrl()).toString(), {
     method: "POST",
     body: JSON.stringify({
-      communityId: "local_ummah",
+      communityId: "1_sadaqa",
       ...data,
     }),
   });

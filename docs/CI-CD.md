@@ -166,7 +166,7 @@ az containerapp update \
 Create a `.env` file (never commit this):
 
 ```bash
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/local_ummah
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/sadaqa
 EXPO_PUBLIC_DOMAIN=localhost:3001
 NODE_ENV=development
 ```

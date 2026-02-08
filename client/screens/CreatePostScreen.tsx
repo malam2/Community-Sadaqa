@@ -312,7 +312,7 @@ export default function CreatePostScreen() {
               type="small"
               style={[styles.disclaimerText, { color: theme.textSecondary }]}
             >
-              I confirm this post follows Local Ummah community guidelines and
+              I confirm this post follows 1 Sadaqa community guidelines and
               does not contain any illegal, harmful, or inappropriate content.
             </ThemedText>
           </Pressable>

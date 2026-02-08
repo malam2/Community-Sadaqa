@@ -21,7 +21,7 @@ export default function FeedStackNavigator() {
         component={FeedScreen}
         options={{
           headerTitle: () => (
-            <HeaderTitle title="One Ummah" subtitle="Community Aid" />
+            <HeaderTitle title="1 Sadaqa" subtitle="Community Aid" />
           ),
         }}
       />

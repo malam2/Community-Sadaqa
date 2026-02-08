@@ -37,7 +37,7 @@ export default function PreviewPostScreen() {
 
   const previewPost: Post = {
     id: "preview",
-    communityId: "local_ummah",
+    communityId: "1_sadaqa",
     type: postData.type,
     category: postData.category,
     title: postData.title,

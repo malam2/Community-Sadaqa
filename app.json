@@ -1,16 +1,16 @@
 {
   "expo": {
-    "name": "Local Ummah",
-    "slug": "local-ummah",
+    "name": "1 Sadaqa",
+    "slug": "1-sadaqa",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "localummah",
+    "scheme": "onesadaqa",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.local.ummah"
+      "bundleIdentifier": "com.one.sadaqa"
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +19,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.local.ummah"
+      "package": "com.one.sadaqa"
     },
     "web": {
       "output": "single",
@@ -42,7 +42,7 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Allow One Ummah to use your location to show nearby posts and help connect you with your community."
+          "locationAlwaysAndWhenInUsePermission": "Allow 1 Sadaqa to use your location to show nearby posts and help connect you with your community."
         }
       ]
     ],

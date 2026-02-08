@@ -52,7 +52,7 @@ export function WelcomeBanner({
                 { color: theme.text, textAlign: "center", flex: 1 },
               ]}
             >
-              One Ummah
+              1 Sadaqa
             </ThemedText>
             <Feather
               name="chevron-down"
@@ -115,7 +115,7 @@ export function WelcomeBanner({
               type="h3"
               style={[styles.title, { color: isDark ? "#F0FDF4" : "#064E3B" }]}
             >
-              One Ummah
+              1 Sadaqa
             </ThemedText>
             <ThemedText
               type="small"
@@ -135,7 +135,7 @@ export function WelcomeBanner({
             style={[styles.mission, { color: isDark ? "#D1FAE5" : "#065F46" }]}
           >
             Many want to help but can't find a way. Many need help but find it
-            hard to ask. One Ummah bridges that gap — building a community where
+            hard to ask. 1 Sadaqa bridges that gap — building a community where
             neighbors become family, and no one stands alone.
           </ThemedText>
         </View>

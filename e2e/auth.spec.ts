@@ -9,7 +9,7 @@ test.describe("Authentication Flow", () => {
 
   test("should display login screen with guest option", async ({ page }) => {
     // Wait for the app to load
-    await expect(page.getByText("One Ummah")).toBeVisible({ timeout: 30000 });
+    await expect(page.getByText("1 Sadaqa")).toBeVisible({ timeout: 30000 });
 
     // Check login form elements
     await expect(page.getByTestId("login-email")).toBeVisible();
@@ -22,7 +22,7 @@ test.describe("Authentication Flow", () => {
   });
 
   test("should allow guest mode access to feed", async ({ page }) => {
-    await expect(page.getByText("One Ummah")).toBeVisible({ timeout: 30000 });
+    await expect(page.getByText("1 Sadaqa")).toBeVisible({ timeout: 30000 });
 
     // Click continue as guest
     await page.getByRole("button", { name: /continue as guest/i }).click();
@@ -34,7 +34,7 @@ test.describe("Authentication Flow", () => {
   });
 
   test("should signup new user successfully", async ({ page }) => {
-    await expect(page.getByText("One Ummah")).toBeVisible({ timeout: 30000 });
+    await expect(page.getByText("1 Sadaqa")).toBeVisible({ timeout: 30000 });
 
     // Navigate to signup
     await page.getByText(/sign up/i).click();

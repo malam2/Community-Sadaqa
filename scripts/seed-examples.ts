@@ -29,10 +29,10 @@ async function seedExamplePosts() {
     const [newUser] = await db
       .insert(users)
       .values({
-        email: "examples@oneummah.local",
+        email: "examples@1sadaqa.local",
         password: "not-for-login",
         displayName: "Community Examples",
-        communityId: "local_ummah",
+        communityId: "1_sadaqa",
       })
       .returning();
     sampleUser = newUser;
@@ -218,7 +218,7 @@ async function seedExamplePosts() {
 
     await db.insert(posts).values({
       ...post,
-      communityId: "local_ummah",
+      communityId: "1_sadaqa",
     });
     insertedCount++;
     console.log(`✅ Created: [${post.type.toUpperCase()}] ${post.title}`);

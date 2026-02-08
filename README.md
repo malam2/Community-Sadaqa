@@ -1,4 +1,4 @@
-# Local Ummah - Community Mutual Aid Platform
+# 1 Sadaqa - Community Mutual Aid Platform
 
 A mosque-centered mutual aid (sadaqa/charity) platform that connects community members who need help with those who can offer it.
 

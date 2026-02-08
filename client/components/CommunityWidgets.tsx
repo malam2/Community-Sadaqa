@@ -215,7 +215,7 @@ const ENCOURAGEMENT_MESSAGES = [
   "Your generosity inspires others to give.",
   "Be the change you wish to see in your community.",
   "Small steps lead to great journeys of kindness.",
-  "The ummah is one body; when one part suffers, all feel it.",
+  "The community is one body; when one part suffers, all feel it.",
 ];
 
 export function EncouragementBadge({ message }: EncouragementBadgeProps) {

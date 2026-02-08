@@ -210,11 +210,11 @@ interface EncouragementBadgeProps {
 }
 
 const ENCOURAGEMENT_MESSAGES = [
-  "One Ummah: In these days, we have all we need — each other 💚",
+  "1 Sadaqa: In these days, we have all we need — each other 💚",
   "Someone out there wants to help. Someone out there needs help. Let's connect them 🤝",
   "Every connection we make builds a stronger community ✨",
   "Today's stranger could be tomorrow's closest friend 🌟",
-  "Asking for help takes courage. Giving builds bonds. Both make us One Ummah 🤲",
+  "Asking for help takes courage. Giving builds bonds. Both make us 1 Sadaqa 🤲",
   "A community that knows each other can stand up to anything 💪",
 ];
 
