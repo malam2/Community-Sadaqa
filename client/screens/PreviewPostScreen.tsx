@@ -74,6 +74,15 @@ export default function PreviewPostScreen() {
           contactPreference: postData.contactPreference,
           contactPhone: postData.contactPhone,
           contactEmail: postData.contactEmail,
+          // Location fields
+          city: postData.city,
+          state: postData.state,
+          zipCode: postData.zipCode,
+          latitude: postData.latitude,
+          longitude: postData.longitude,
+          // Exchange type
+          exchangeType: postData.exchangeType,
+          exchangeNotes: postData.exchangeNotes,
         },
       });
 

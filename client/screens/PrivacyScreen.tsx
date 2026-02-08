@@ -34,15 +34,16 @@ export default function PrivacyScreen() {
       </ThemedText>
 
       <Section title="Information We Collect" theme={theme}>
-        IOK Sadaqa collects minimal information necessary to provide our
-        service. This includes your display name and any posts you create. All
-        data is stored locally on your device in this version of the app.
+        One Ummah collects minimal information necessary to provide our
+        service. This includes your email address, display name, optional
+        location (city, state, ZIP code), and any posts you create.
       </Section>
 
       <Section title="How We Use Your Information" theme={theme}>
-        Your information is used solely to display your posts to the community
-        and to provide the functionality of the app. We do not sell or share
-        your personal information with third parties.
+        Your information is used to display your posts to the community,
+        facilitate connections between members, and provide location-based
+        features. We do not sell or share your personal information with
+        third parties.
       </Section>
 
       <Section title="Anonymous Posting" theme={theme}>
@@ -52,9 +53,15 @@ export default function PrivacyScreen() {
       </Section>
 
       <Section title="Data Storage" theme={theme}>
-        In this version, all data is stored locally on your device using secure
-        storage. If you clear the app data or uninstall the app, your posts and
-        profile information will be deleted.
+        Your data is stored securely on our servers using encrypted connections.
+        Your password is hashed using bcrypt and is never stored in plain text.
+        You can request deletion of your account and data at any time.
+      </Section>
+
+      <Section title="Messaging" theme={theme}>
+        Messages sent through the app are stored on our servers to facilitate
+        conversations between community members. Message content is only
+        accessible to conversation participants.
       </Section>
 
       <Section title="Reporting" theme={theme}>
@@ -64,14 +71,14 @@ export default function PrivacyScreen() {
       </Section>
 
       <Section title="Your Rights" theme={theme}>
-        You have the right to delete all your data at any time through the
-        Profile section of the app. You can also edit your display name and
-        update your posts.
+        You have the right to delete your posts and update your profile
+        information at any time through the Profile section of the app. You
+        can also contact us to request full account deletion.
       </Section>
 
       <Section title="Contact Us" theme={theme}>
         If you have any questions about this privacy policy or our practices,
-        please contact the Local Ummah administration.
+        please contact the One Ummah administration.
       </Section>
 
       <ThemedText

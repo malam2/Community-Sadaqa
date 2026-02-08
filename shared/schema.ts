@@ -7,6 +7,7 @@ import {
   integer,
   timestamp,
   doublePrecision,
+  index,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -59,7 +60,10 @@ export const posts = pgTable("posts", {
   exchangeType: text("exchange_type").default("goods"), // 'goods' | 'money' | 'either' | 'service'
   exchangeNotes: text("exchange_notes"), // Explanation if money is needed
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => [
+  index("posts_author_id_idx").on(table.authorId),
+  index("posts_status_created_idx").on(table.status, table.createdAt),
+]);
 
 // Conversations between users (privacy-preserving via Twilio)
 export const conversations = pgTable("conversations", {
@@ -90,7 +94,11 @@ export const conversations = pgTable("conversations", {
   status: text("status").notNull().default("active"), // 'active' | 'meeting_set' | 'completed' | 'cancelled'
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (table) => [
+  index("conversations_participant1_idx").on(table.participant1Id),
+  index("conversations_participant2_idx").on(table.participant2Id),
+  index("conversations_post_id_idx").on(table.postId),
+]);
 
 // Messages in a conversation (stored for reference, routed via Twilio)
 export const messages = pgTable("messages", {
@@ -109,7 +117,10 @@ export const messages = pgTable("messages", {
   // Read status
   isRead: boolean("is_read").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => [
+  index("messages_conversation_id_idx").on(table.conversationId),
+  index("messages_sender_id_idx").on(table.senderId),
+]);
 
 export const reports = pgTable("reports", {
   id: varchar("id")
@@ -124,7 +135,9 @@ export const reports = pgTable("reports", {
   reason: text("reason").notNull(), // 'scam' | 'illegal' | 'harassment' | 'other'
   details: text("details"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => [
+  index("reports_post_id_idx").on(table.postId),
+]);
 
 export const insertUserSchema = createInsertSchema(users).pick({
   email: true,

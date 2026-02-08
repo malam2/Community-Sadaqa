@@ -2,6 +2,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getApiUrl } from "@/lib/query-client";
 
 const AUTH_KEY = "@local_ummah_auth";
+const TOKEN_KEY = "@local_ummah_token";
+
+// In-memory token cache for synchronous access
+let cachedToken: string | null = null;
 
 export interface AuthUser {
   id: string;
@@ -31,6 +35,8 @@ export function createGuestUser(): AuthUser {
 export async function getStoredUser(): Promise<AuthUser | null> {
   try {
     const data = await AsyncStorage.getItem(AUTH_KEY);
+    const token = await AsyncStorage.getItem(TOKEN_KEY);
+    cachedToken = token;
     if (data) {
       return JSON.parse(data);
     }
@@ -40,12 +46,49 @@ export async function getStoredUser(): Promise<AuthUser | null> {
   }
 }
 
-export async function storeUser(user: AuthUser): Promise<void> {
+export async function storeUser(user: AuthUser, token?: string): Promise<void> {
   await AsyncStorage.setItem(AUTH_KEY, JSON.stringify(user));
+  if (token) {
+    cachedToken = token;
+    await AsyncStorage.setItem(TOKEN_KEY, token);
+  }
 }
 
 export async function clearUser(): Promise<void> {
-  await AsyncStorage.removeItem(AUTH_KEY);
+  cachedToken = null;
+  await AsyncStorage.multiRemove([AUTH_KEY, TOKEN_KEY]);
+}
+
+/**
+ * Get the current auth token synchronously (from cache).
+ * Returns null if not authenticated.
+ */
+export function getAuthToken(): string | null {
+  return cachedToken;
+}
+
+/**
+ * Authenticated fetch wrapper. Adds Authorization header with JWT token.
+ * Use this for all API calls that require authentication.
+ */
+export async function authFetch(
+  url: string,
+  options: RequestInit = {},
+): Promise<Response> {
+  const token = getAuthToken();
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...(options.headers as Record<string, string>),
+  };
+
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  return fetch(url, {
+    ...options,
+    headers,
+  });
 }
 
 export interface SignupLocationData {
@@ -78,7 +121,7 @@ export async function signup(
     throw new Error(data.error || "Failed to create account");
   }
 
-  await storeUser(data.user);
+  await storeUser(data.user, data.token);
   return data.user;
 }
 
@@ -101,7 +144,7 @@ export async function login(
     throw new Error(data.error || "Failed to login");
   }
 
-  await storeUser(data.user);
+  await storeUser(data.user, data.token);
   return data.user;
 }
 
@@ -113,11 +156,10 @@ export async function updateDisplayName(
   userId: string,
   displayName: string,
 ): Promise<AuthUser> {
-  const response = await fetch(
+  const response = await authFetch(
     new URL(`/api/users/${userId}`, getApiUrl()).toString(),
     {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ displayName }),
     },
   );
@@ -136,11 +178,10 @@ export async function updateUserLocation(
   userId: string,
   location: SignupLocationData,
 ): Promise<AuthUser> {
-  const response = await fetch(
-    new URL(`/api/users/${userId}/location`, getApiUrl()).toString(),
+  const response = await authFetch(
+    new URL(`/api/users/${userId}`, getApiUrl()).toString(),
     {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(location),
     },
   );

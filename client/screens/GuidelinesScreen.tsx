@@ -30,7 +30,7 @@ export default function GuidelinesScreen() {
         type="body"
         style={[styles.intro, { color: theme.textSecondary }]}
       >
-        Welcome to IOK Sadaqa! Our community is built on trust, respect, and the
+        Welcome to One Ummah! Our community is built on trust, respect, and the
         spirit of giving (sadaqa). Please follow these guidelines to help
         maintain a safe and supportive environment.
       </ThemedText>
@@ -70,7 +70,7 @@ export default function GuidelinesScreen() {
         type="small"
         style={[styles.footer, { color: theme.textTertiary }]}
       >
-        By using IOK Sadaqa, you agree to follow these guidelines. Violations
+        By using One Ummah, you agree to follow these guidelines. Violations
         may result in removal of posts or account suspension.
       </ThemedText>
     </ScrollView>

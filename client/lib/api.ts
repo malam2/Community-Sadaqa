@@ -1,4 +1,5 @@
 import { getApiUrl } from "@/lib/query-client";
+import { authFetch } from "@/lib/auth";
 import { Post, PostType, PostCategory, ContactPreference, ExchangeType } from "@/types/post";
 import { Conversation, Message, MeetingInfo, MeetingDetails } from "@/types/conversation";
 import { UserLocation } from "@/types/location";
@@ -51,7 +52,7 @@ export async function fetchPosts(options?: FetchPostsOptions): Promise<Post[]> {
 }
 
 export async function fetchUserPosts(userId: string): Promise<Post[]> {
-  const response = await fetch(
+  const response = await authFetch(
     new URL(`/api/posts/user/${userId}`, getApiUrl()).toString(),
   );
   if (!response.ok) {
@@ -64,11 +65,9 @@ export async function createPost(
   userId: string,
   data: CreatePostData,
 ): Promise<Post> {
-  const response = await fetch(new URL("/api/posts", getApiUrl()).toString(), {
+  const response = await authFetch(new URL("/api/posts", getApiUrl()).toString(), {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      userId,
       communityId: "local_ummah",
       ...data,
     }),
@@ -86,12 +85,11 @@ export async function updatePost(
   userId: string,
   updates: Partial<Post>,
 ): Promise<Post> {
-  const response = await fetch(
+  const response = await authFetch(
     new URL(`/api/posts/${id}`, getApiUrl()).toString(),
     {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, ...updates }),
+      body: JSON.stringify(updates),
     },
   );
 
@@ -103,12 +101,10 @@ export async function updatePost(
 }
 
 export async function deletePost(id: string, userId: string): Promise<void> {
-  const response = await fetch(
+  const response = await authFetch(
     new URL(`/api/posts/${id}`, getApiUrl()).toString(),
     {
       method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId }),
     },
   );
 
@@ -124,12 +120,11 @@ export async function submitReport(
   reason: string,
   details?: string,
 ): Promise<void> {
-  const response = await fetch(
+  const response = await authFetch(
     new URL("/api/reports", getApiUrl()).toString(),
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, postId, reason, details }),
+      body: JSON.stringify({ postId, reason, details }),
     },
   );
 
@@ -147,11 +142,10 @@ export async function updateUserLocation(
   userId: string,
   location: UserLocation,
 ): Promise<void> {
-  const response = await fetch(
+  const response = await authFetch(
     new URL(`/api/users/${userId}`, getApiUrl()).toString(),
     {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(location),
     },
   );
@@ -180,12 +174,11 @@ export async function startConversation(
   userId: string,
   postId: string,
 ): Promise<Conversation> {
-  const response = await fetch(
+  const response = await authFetch(
     new URL("/api/conversations", getApiUrl()).toString(),
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, postId }),
+      body: JSON.stringify({ postId }),
     },
   );
 
@@ -199,7 +192,7 @@ export async function startConversation(
 export async function fetchUserConversations(
   userId: string,
 ): Promise<Conversation[]> {
-  const response = await fetch(
+  const response = await authFetch(
     new URL(`/api/conversations/user/${userId}`, getApiUrl()).toString(),
   );
   if (!response.ok) {
@@ -212,13 +205,12 @@ export async function fetchConversationMessages(
   conversationId: string,
   userId: string,
 ): Promise<Message[]> {
-  const url = new URL(
-    `/api/conversations/${conversationId}/messages`,
-    getApiUrl(),
+  const response = await authFetch(
+    new URL(
+      `/api/conversations/${conversationId}/messages`,
+      getApiUrl(),
+    ).toString(),
   );
-  url.searchParams.set("userId", userId);
-
-  const response = await fetch(url.toString());
   if (!response.ok) {
     throw new Error("Failed to fetch messages");
   }
@@ -230,15 +222,14 @@ export async function sendMessage(
   userId: string,
   content: string,
 ): Promise<Message> {
-  const response = await fetch(
+  const response = await authFetch(
     new URL(
       `/api/conversations/${conversationId}/messages`,
       getApiUrl(),
     ).toString(),
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, content }),
+      body: JSON.stringify({ content }),
     },
   );
 
@@ -254,16 +245,14 @@ export async function setMeetingDetails(
   userId: string,
   meeting: MeetingDetails,
 ): Promise<Conversation> {
-  const response = await fetch(
+  const response = await authFetch(
     new URL(
       `/api/conversations/${conversationId}/meeting`,
       getApiUrl(),
     ).toString(),
     {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        userId,
         meetingLocation: meeting.location,
         meetingAddress: meeting.address,
         meetingLatitude: meeting.latitude,
@@ -285,15 +274,13 @@ export async function completeConversation(
   conversationId: string,
   userId: string,
 ): Promise<Conversation> {
-  const response = await fetch(
+  const response = await authFetch(
     new URL(
       `/api/conversations/${conversationId}/complete`,
       getApiUrl(),
     ).toString(),
     {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId }),
     },
   );
 

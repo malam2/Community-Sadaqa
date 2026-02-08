@@ -38,7 +38,13 @@
           }
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow One Ummah to use your location to show nearby posts and help connect you with your community."
+        }
+      ]
     ],
     "experiments": {
       "reactCompiler": true

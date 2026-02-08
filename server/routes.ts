@@ -1,6 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "node:http";
 import { eq, desc, and, sql, gte, lte, or } from "drizzle-orm";
+import rateLimit from "express-rate-limit";
 import { db } from "./db";
 import {
   users,
@@ -28,6 +29,7 @@ import {
   getSuggestedMeetingPlaces,
   getMeetupSafetyTips,
 } from "./services/twilio";
+import { generateToken, requireAuth, optionalAuth } from "./services/auth";
 
 const SALT_ROUNDS = 10;
 
@@ -49,8 +51,17 @@ async function verifyPassword(
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Rate limiting for auth endpoints
+  const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 10, // 10 attempts per window
+    message: { error: "Too many attempts, please try again later" },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+
   // Auth routes
-  app.post("/api/auth/signup", async (req: Request, res: Response) => {
+  app.post("/api/auth/signup", authLimiter, async (req: Request, res: Response) => {
     try {
       const result = signupSchema.safeParse(req.body);
       if (!result.success) {
@@ -95,6 +106,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
         .returning();
 
+      const token = generateToken(user.id, user.email);
+
       return res.json({
         user: {
           id: user.id,
@@ -108,6 +121,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           longitude: user.longitude,
           locationRadius: user.locationRadius,
         },
+        token,
       });
     } catch (error) {
       console.error("Signup error:", error);
@@ -115,7 +129,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/auth/login", async (req: Request, res: Response) => {
+  app.post("/api/auth/login", authLimiter, async (req: Request, res: Response) => {
     try {
       const result = loginSchema.safeParse(req.body);
       if (!result.success) {
@@ -138,6 +152,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Invalid email or password" });
       }
 
+      const token = generateToken(user.id, user.email);
+
       return res.json({
         user: {
           id: user.id,
@@ -151,6 +167,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           longitude: user.longitude,
           locationRadius: user.locationRadius,
         },
+        token,
       });
     } catch (error) {
       console.error("Login error:", error);
@@ -161,6 +178,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Posts routes
   app.get("/api/posts", async (req: Request, res: Response) => {
     try {
+      // Pagination
+      const limit = Math.min(Math.max(parseInt(req.query.limit as string) || 50, 1), 100);
+      const offset = Math.max(parseInt(req.query.offset as string) || 0, 0);
+
       // Extract location filters from query params
       const userLat = req.query.lat ? parseFloat(req.query.lat as string) : null;
       const userLng = req.query.lng ? parseFloat(req.query.lng as string) : null;
@@ -197,7 +218,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .from(posts)
         .leftJoin(users, eq(posts.authorId, users.id))
         .where(eq(posts.status, "open"))
-        .orderBy(desc(posts.urgent), desc(posts.createdAt));
+        .orderBy(desc(posts.urgent), desc(posts.createdAt))
+        .limit(limit)
+        .offset(offset);
 
       let allPosts = await query;
 
@@ -263,6 +286,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           contactPreference: posts.contactPreference,
           contactPhone: posts.contactPhone,
           contactEmail: posts.contactEmail,
+          city: posts.city,
+          state: posts.state,
+          zipCode: posts.zipCode,
+          latitude: posts.latitude,
+          longitude: posts.longitude,
+          exchangeType: posts.exchangeType,
+          exchangeNotes: posts.exchangeNotes,
           createdAt: posts.createdAt,
           authorDisplayName: users.displayName,
         })
@@ -284,12 +314,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/posts", async (req: Request, res: Response) => {
+  // Get a single post by ID (must be after /api/posts/user/:userId)
+  app.get("/api/posts/:id", async (req: Request, res: Response) => {
     try {
-      const { userId, ...postData } = req.body;
-      if (!userId) {
-        return res.status(401).json({ error: "Unauthorized" });
+      const id = req.params.id as string;
+      const [post] = await db
+        .select({
+          id: posts.id,
+          communityId: posts.communityId,
+          type: posts.type,
+          category: posts.category,
+          title: posts.title,
+          description: posts.description,
+          isAnonymous: posts.isAnonymous,
+          authorId: posts.authorId,
+          status: posts.status,
+          urgent: posts.urgent,
+          contactPreference: posts.contactPreference,
+          contactPhone: posts.contactPhone,
+          contactEmail: posts.contactEmail,
+          city: posts.city,
+          state: posts.state,
+          zipCode: posts.zipCode,
+          latitude: posts.latitude,
+          longitude: posts.longitude,
+          exchangeType: posts.exchangeType,
+          exchangeNotes: posts.exchangeNotes,
+          createdAt: posts.createdAt,
+          authorDisplayName: users.displayName,
+        })
+        .from(posts)
+        .leftJoin(users, eq(posts.authorId, users.id))
+        .where(eq(posts.id, id));
+
+      if (!post) {
+        return res.status(404).json({ error: "Post not found" });
       }
+
+      return res.json({
+        ...post,
+        createdAt: new Date(post.createdAt).getTime(),
+        authorDisplayName: post.isAnonymous ? undefined : post.authorDisplayName,
+      });
+    } catch (error) {
+      console.error("Get post error:", error);
+      return res.status(500).json({ error: "Failed to fetch post" });
+    }
+  });
+
+  app.post("/api/posts", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = req.userId!;
+      const postData = req.body;
 
       const result = insertPostSchema.safeParse(postData);
       if (!result.success) {
@@ -317,10 +393,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/posts/:id", async (req: Request, res: Response) => {
+  app.patch("/api/posts/:id", requireAuth, async (req: Request, res: Response) => {
     try {
       const id = req.params.id as string;
-      const { userId, ...updates } = req.body;
+      const userId = req.userId!;
+      const updates = req.body;
 
       const [post] = await db.select().from(posts).where(eq(posts.id, id));
       if (!post) {
@@ -349,10 +426,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/posts/:id", async (req: Request, res: Response) => {
+  app.delete("/api/posts/:id", requireAuth, async (req: Request, res: Response) => {
     try {
       const id = req.params.id as string;
-      const { userId } = req.body;
+      const userId = req.userId!;
 
       const [post] = await db.select().from(posts).where(eq(posts.id, id));
       if (!post) {
@@ -376,12 +453,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Reports routes
-  app.post("/api/reports", async (req: Request, res: Response) => {
+  app.post("/api/reports", requireAuth, async (req: Request, res: Response) => {
     try {
-      const { userId, ...reportData } = req.body;
-      if (!userId) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
+      const userId = req.userId!;
+      const reportData = req.body;
 
       const result = insertReportSchema.safeParse(reportData);
       if (!result.success) {
@@ -417,9 +492,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User routes
-  app.patch("/api/users/:id", async (req: Request, res: Response) => {
+  app.patch("/api/users/:id", requireAuth, async (req: Request, res: Response) => {
     try {
       const id = req.params.id as string;
+
+      // Verify user can only update their own profile
+      if (req.userId !== id) {
+        return res.status(403).json({ error: "Not authorized to update this user" });
+      }
+
       const { displayName, city, state, zipCode, latitude, longitude, locationRadius } = req.body;
 
       // Validate location update if provided
@@ -483,12 +564,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Start a new conversation about a post
-  app.post("/api/conversations", async (req: Request, res: Response) => {
+  app.post("/api/conversations", requireAuth, async (req: Request, res: Response) => {
     try {
-      const { userId, postId } = req.body;
-      if (!userId) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
+      const userId = req.userId!;
+      const { postId } = req.body;
 
       // Get the post
       const [post] = await db.select().from(posts).where(eq(posts.id, postId));
@@ -536,11 +615,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get user's conversations
-  app.get("/api/conversations/user/:userId", async (req: Request, res: Response) => {
+  app.get("/api/conversations/user/:userId", requireAuth, async (req: Request, res: Response) => {
     try {
       const userId = req.params.userId as string;
 
-      // Get conversations where user is either participant
+      // Verify user can only view their own conversations
+      if (req.userId !== userId) {
+        return res.status(403).json({ error: "Not authorized to view these conversations" });
+      }
+
+      // Get conversations where user is either participant, with all related data in fewer queries
       const userConversations = await db
         .select({
           id: conversations.id,
@@ -568,59 +652,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
         )
         .orderBy(desc(conversations.updatedAt));
 
-      // Get display names for other participants
-      const conversationsWithParticipants = await Promise.all(
-        userConversations.map(async (conv) => {
-          const otherUserId =
-            conv.participant1Id === userId
-              ? conv.participant2Id
-              : conv.participant1Id;
-          const [otherUser] = await db
-            .select({ displayName: users.displayName })
+      if (userConversations.length === 0) {
+        return res.json([]);
+      }
+
+      // Batch: get all participant IDs we need to look up
+      const otherUserIds = [...new Set(userConversations.map((c) =>
+        c.participant1Id === userId ? c.participant2Id : c.participant1Id
+      ))];
+      const conversationIds = userConversations.map((c) => c.id);
+
+      // Single query: get all other participant names
+      const otherUsers = otherUserIds.length > 0
+        ? await db
+            .select({ id: users.id, displayName: users.displayName })
             .from(users)
-            .where(eq(users.id, otherUserId));
+            .where(sql`${users.id} IN ${otherUserIds}`)
+        : [];
+      const userNameMap = new Map(otherUsers.map((u) => [u.id, u.displayName]));
 
-          // Get last message
-          const [lastMessage] = await db
-            .select()
-            .from(messages)
-            .where(eq(messages.conversationId, conv.id))
-            .orderBy(desc(messages.createdAt))
-            .limit(1);
-
-          // Get unread count
-          const unreadCount = await db
-            .select({ count: sql<number>`count(*)` })
-            .from(messages)
-            .where(
-              and(
-                eq(messages.conversationId, conv.id),
-                eq(messages.isRead, false),
-                sql`${messages.senderId} != ${userId}`,
-              ),
-            );
-
-          return {
-            ...conv,
-            createdAt: new Date(conv.createdAt).getTime(),
-            updatedAt: new Date(conv.updatedAt).getTime(),
-            meetingTime: conv.meetingTime
-              ? new Date(conv.meetingTime).getTime()
-              : null,
-            otherParticipantName: otherUser?.displayName ?? "Unknown",
-            lastMessage: lastMessage
-              ? {
-                  content: lastMessage.content,
-                  createdAt: new Date(lastMessage.createdAt).getTime(),
-                  isFromMe: lastMessage.senderId === userId,
-                }
-              : null,
-            unreadCount: Number(unreadCount[0]?.count ?? 0),
-          };
-        }),
+      // Single query: get last message per conversation using DISTINCT ON
+      const lastMessages = await db.execute(sql`
+        SELECT DISTINCT ON (conversation_id)
+          conversation_id, content, created_at, sender_id
+        FROM messages
+        WHERE conversation_id IN ${conversationIds}
+        ORDER BY conversation_id, created_at DESC
+      `);
+      const lastMessageMap = new Map(
+        (lastMessages.rows as any[]).map((m: any) => [m.conversation_id, m])
       );
 
-      return res.json(conversationsWithParticipants);
+      // Single query: get unread counts per conversation
+      const unreadCounts = await db.execute(sql`
+        SELECT conversation_id, COUNT(*) as count
+        FROM messages
+        WHERE conversation_id IN ${conversationIds}
+          AND is_read = false
+          AND sender_id != ${userId}
+        GROUP BY conversation_id
+      `);
+      const unreadMap = new Map(
+        (unreadCounts.rows as any[]).map((r: any) => [r.conversation_id, Number(r.count)])
+      );
+
+      const result = userConversations.map((conv) => {
+        const otherUserId = conv.participant1Id === userId
+          ? conv.participant2Id
+          : conv.participant1Id;
+        const lastMsg = lastMessageMap.get(conv.id);
+
+        return {
+          ...conv,
+          createdAt: new Date(conv.createdAt).getTime(),
+          updatedAt: new Date(conv.updatedAt).getTime(),
+          meetingTime: conv.meetingTime
+            ? new Date(conv.meetingTime).getTime()
+            : null,
+          otherParticipantName: userNameMap.get(otherUserId) ?? "Unknown",
+          lastMessage: lastMsg
+            ? {
+                content: lastMsg.content,
+                createdAt: new Date(lastMsg.created_at).getTime(),
+                isFromMe: lastMsg.sender_id === userId,
+              }
+            : null,
+          unreadCount: unreadMap.get(conv.id) ?? 0,
+        };
+      });
+
+      return res.json(result);
     } catch (error) {
       console.error("Get conversations error:", error);
       return res.status(500).json({ error: "Failed to fetch conversations" });
@@ -630,14 +731,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get messages for a conversation
   app.get(
     "/api/conversations/:conversationId/messages",
+    requireAuth,
     async (req: Request, res: Response) => {
       try {
         const conversationId = req.params.conversationId as string;
-        const userId = req.query.userId as string;
-
-        if (!userId) {
-          return res.status(401).json({ error: "Unauthorized" });
-        }
+        const userId = req.userId!;
 
         // Verify user is participant
         const [conversation] = await db
@@ -702,14 +800,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Send a message
   app.post(
     "/api/conversations/:conversationId/messages",
+    requireAuth,
     async (req: Request, res: Response) => {
       try {
         const conversationId = req.params.conversationId as string;
-        const { userId, content } = req.body;
-
-        if (!userId) {
-          return res.status(401).json({ error: "Unauthorized" });
-        }
+        const userId = req.userId!;
+        const { content } = req.body;
 
         if (!content || content.trim().length === 0) {
           return res.status(400).json({ error: "Message cannot be empty" });
@@ -775,14 +871,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Set meeting details for a conversation
   app.patch(
     "/api/conversations/:conversationId/meeting",
+    requireAuth,
     async (req: Request, res: Response) => {
       try {
         const conversationId = req.params.conversationId as string;
-        const { userId, ...meetingData } = req.body;
-
-        if (!userId) {
-          return res.status(401).json({ error: "Unauthorized" });
-        }
+        const userId = req.userId!;
+        const meetingData = req.body;
 
         // Verify user is participant
         const [conversation] = await db
@@ -839,14 +933,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Mark conversation as complete
   app.patch(
     "/api/conversations/:conversationId/complete",
+    requireAuth,
     async (req: Request, res: Response) => {
       try {
         const conversationId = req.params.conversationId as string;
-        const { userId } = req.body;
-
-        if (!userId) {
-          return res.status(401).json({ error: "Unauthorized" });
-        }
+        const userId = req.userId!;
 
         // Verify user is participant
         const [conversation] = await db
